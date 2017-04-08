@@ -3,8 +3,8 @@
  *
  * Created: 4/7/2017 5:04:36 PM
  *  Author: Terence Sun (tsun1215)
- */ 
-#include <pir.h>
+ */
+#include <drivers/pir/pir.h>
 
 /**
  * @brief      Initializes the PIR_VCC_CTRL line for power control
