@@ -28,10 +28,20 @@
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 #include <asf.h>
+#include <pir.h>
+
+/**
+ * @brief      Runs when the PIR detects motion
+ */
+void pir_on_wake(void) {
+	// TODO: Implement what happens when the PIR sends an interrupt
+}
 
 int main (void)
 {
 	system_init();
+	pir_init(pir_on_wake);  // Init PIR
 
-	/* Insert application code here, after the board has been initialized. */
+	while(1) {
+	}
 }
