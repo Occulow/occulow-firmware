@@ -611,6 +611,8 @@
     <Folder Include="src\ASF\thirdparty\CMSIS\Lib\" />
     <Folder Include="src\ASF\thirdparty\CMSIS\Lib\GCC\" />
     <Folder Include="src\config\" />
+    <Folder Include="src\drivers" />
+    <Folder Include="src\drivers\pir" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\asf.h">
@@ -1114,6 +1116,12 @@
     <None Include="src\config\conf_extint.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\drivers\pir\pir.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\pir\pir.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\main.c">
       <SubType>compile</SubType>
     </Compile>
