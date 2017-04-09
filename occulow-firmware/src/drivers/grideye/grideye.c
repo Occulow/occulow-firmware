@@ -39,11 +39,12 @@ void grideye_init(void)
 	i2c_master_get_config_defaults(&config_i2c_master);
 
 	/* Change buffer timeout to something longer. */
-	config_i2c_master.buffer_timeout = 10000;
+	config_i2c_master.buffer_timeout = GE_I2C_BUFFER_TIMEOUT;
+	config_i2c_master.pinmux_pad0 = GE_SERCOM_PAD0;
+	config_i2c_master.pinmux_pad1 = GE_SERCOM_PAD1;
 	
 	/* Initialize and enable device with config. */
-	i2c_master_init(&i2c_master_instance, GE_I2C_SERCOM, &config_i2c_master);
-
+	i2c_master_init(&i2c_master_instance, GE_I2C_MODULE, &config_i2c_master);
 	i2c_master_enable(&i2c_master_instance);
 }
 
@@ -152,6 +153,7 @@ uint8_t read_byte(uint8_t addr) {
 	}
 	
 	/* Read value */
+	timeout = 0;
 	packet.data = ge_read_buffer;
 	while (i2c_master_read_packet_wait(&i2c_master_instance, &packet) !=
 	STATUS_OK) {
