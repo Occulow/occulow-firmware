@@ -19,7 +19,7 @@ void pir_on_wake(void) {
 
 int main (void)
 {
-	uint16_t grideye_frame[NUM_PIXELS];
+	uint16_t grideye_frame[GE_FRAME_SIZE];
 	char buffer[512];
 	system_init();
 	stdio_init();
@@ -30,7 +30,7 @@ int main (void)
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);
 			uint16_t size = 0;
-			for (int i = 0; i < NUM_PIXELS; i++) {
+			for (int i = 0; i < GE_FRAME_SIZE; i++) {
 				size += sprintf((char *) (buffer + size), "%d,", grideye_frame[i]);
 			}
 			buffer[size-1] = '\r';  // Replace last comma with \r

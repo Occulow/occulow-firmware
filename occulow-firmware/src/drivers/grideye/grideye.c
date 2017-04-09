@@ -116,7 +116,7 @@ double ge_get_ambient_temp(void)
 void ge_get_frame(uint16_t *frame_buffer)
 {
 	uint8_t lsb, msb;
-	for (int i = 0; i < NUM_PIXELS; i++) {
+	for (int i = 0; i < GE_FRAME_SIZE; i++) {
 		lsb = read_byte(GE_REG_PIXEL_BASE + 2*i);
 		msb = read_byte(GE_REG_PIXEL_BASE + 2*i + 1);
 		frame_buffer[i] = ((msb << 8) + lsb);
