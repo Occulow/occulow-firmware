@@ -614,6 +614,7 @@
     <Folder Include="src\config\" />
     <Folder Include="src\drivers" />
     <Folder Include="src\drivers\grideye" />
+    <Folder Include="src\drivers\stdio_usart" />
     <Folder Include="src\drivers\pir" />
   </ItemGroup>
   <ItemGroup>
@@ -1128,6 +1129,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\drivers\pir\pir.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\stdio_usart\stdio_usart.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\stdio_usart\stdio_usart.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\main.c">
