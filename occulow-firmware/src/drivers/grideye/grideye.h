@@ -14,7 +14,10 @@
 #define GE_MODE_STANDBY_1 0x20
 #define GE_MODE_STANDBY_2 0x21
 
-#define GE_I2C_SERCOM SERCOM2
+#define GE_I2C_BUFFER_TIMEOUT 10000
+#define GE_I2C_MODULE SERCOM3
+#define GE_SERCOM_PAD0 PINMUX_PA00D_SERCOM1_PAD0
+#define GE_SERCOM_PAD1 PINMUX_PA01D_SERCOM1_PAD1
 
 void grideye_init(void);
 bool ge_is_sleeping(void);
