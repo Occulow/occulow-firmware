@@ -6,6 +6,7 @@
 #include <asf.h>
 #include <drivers/pir/pir.h>
 #include <drivers/grideye/grideye.h>
+#include <drivers/people_counting/people_counting.h>
 #include <drivers/stdio_usart/stdio_usart.h>
 
 /**
@@ -19,24 +20,31 @@ void pir_on_wake(void) {
 
 int main (void)
 {
-	uint16_t grideye_frame[GE_FRAME_SIZE];
-	char buffer[512];
+	frame_elem_t grideye_frame[GE_FRAME_SIZE];
 	system_init();
+	delay_init();
 	stdio_init();
 	grideye_init();
-	pir_init(pir_on_wake);  // Init PIR
+	pc_init();
+	// pir_init(pir_on_wake);  // Init PIR
 
+	double old_in_count = 0;
+	double old_out_count = 0;
+	double in_count = 0;
+	double out_count = 0;
+	
 	while(1) {
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);
-			uint16_t size = 0;
-			for (int i = 0; i < GE_FRAME_SIZE; i++) {
-				size += sprintf((char *) (buffer + size), "%d,", grideye_frame[i]);
+			pc_new_frame(grideye_frame);
+			in_count = pc_get_in_count();
+			out_count = pc_get_out_count();
+			
+			if (in_count > old_in_count || out_count > old_out_count) {
+				printf("In: %d, Out: %d\r\n", (int) in_count, (int) out_count);		
+				old_in_count = in_count;
+				old_out_count = out_count;		
 			}
-			buffer[size-1] = '\r';  // Replace last comma with \r
-			buffer[size] = '\n';
-			buffer[size+1] = '\0';
-			printf("%s", buffer);
 		}
 	}
 }
