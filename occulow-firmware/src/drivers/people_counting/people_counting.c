@@ -29,6 +29,7 @@ static pc_config_t pc_config;  ///< Configuration object
  */
 void pc_init() {
 	initialize_counter(&pc_counter);
+	initialize_config(&pc_config);
 	initialize_frame_stacks();
 }
 
@@ -51,6 +52,16 @@ void pc_new_frame(frame_t new_frame) {
 	// Compute and enqueue median frame
 	frame_elem_t median_filtered_frame[GE_FRAME_SIZE];
 	compute_median_frame(median_filtered_frame, RAW_FRAMES, NUM_RAW_FRAMES);
+	
+	// Subtract median from the new frame
+	for (int i = 0; i < GE_FRAME_SIZE; i++) {
+		if (new_frame[i] < median_filtered_frame[i]) {
+			median_filtered_frame[i] = 0;
+		} else {
+			median_filtered_frame[i] = new_frame[i] - median_filtered_frame[i];
+		}
+	}
+	
 	enqueue_frame(MEDIAN_FRAMES, median_filtered_frame, NUM_MEDIAN_FRAMES);
 	
 	// Reset counted
@@ -86,12 +97,19 @@ double pc_get_out_count(void) {
 /**
  * @brief      Initializes a counter object
  */
-void initialize_counter(pc_counter_t *counter)
+static void initialize_counter(pc_counter_t *counter)
 {
 	counter->in_count = 0;
 	counter->out_count = 0;
 	counter->count_updated = false;
 }
+
+static void initialize_config(pc_config_t *config) {
+	config->trigger_column[0] = TRIGGER_COLUNM_2;
+	config->trigger_column[1] = TRIGGER_COLUNM_5;
+	config->trigger_check_offset[0] = CHECK_OFFSET_2;
+	config->trigger_check_offset[1] = CHECK_OFFSET_5;
+};
 
 /**
  * @brief      Initializes the frame stacks
@@ -117,14 +135,14 @@ static void initialize_frame_stacks(void) {
  * @return     Direction of movement if detected, NONE otherwise
  */
 static direction_t determine_direction(uint16_t frame_index, 
-	uint16_t trigger_col, uint16_t offset) {
+	int16_t trigger_col, int16_t offset) {
 	if (TRIGGER_INDEX >= NUM_MEDIAN_FRAMES - 1 || TRIGGER_INDEX < 1){
 		//TODO: Handle exception
 	}
 	if (trigger_col + offset < 0 || trigger_col + offset >= GRID_SIZE) {
 		//TODO: Handle exception
 	}
-	uint16_t check_col = trigger_col + offset;
+	uint16_t check_col = (uint16_t) (trigger_col + offset);
 	frame_t current_frame = MEDIAN_FRAMES[frame_index];
 	uint16_t current_max_index = 
 		get_max_index_in_col(current_frame, trigger_col);
@@ -181,14 +199,14 @@ static void update_counter(void) {
 	for (int i = 0; i < 2; i++){
 		uint16_t trigger_col = pc_config.trigger_column[i];
 		uint16_t offset = pc_config.trigger_check_offset[i];
-		int direction = determine_direction(TRIGGER_INDEX, trigger_col, offset);
+		direction_t direction = determine_direction(TRIGGER_INDEX, trigger_col, offset);
 		
 		// Increment count according to number of trigger columns
 		// TODO: Is this math too slow?
 		if (direction == DIR_IN) {
-			pc_counter.in_count = pc_counter.in_count + (1/sizeof(pc_config.trigger_column));
+			pc_counter.in_count = pc_counter.in_count + (1.0/sizeof(pc_config.trigger_column));
 		} else if (direction == DIR_OUT) {
-			pc_counter.out_count = pc_counter.out_count + (1/sizeof(pc_config.trigger_column));
+			pc_counter.out_count = pc_counter.out_count + (1.0/sizeof(pc_config.trigger_column));
 		}
 	}
 	

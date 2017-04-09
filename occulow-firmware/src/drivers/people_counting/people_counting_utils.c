@@ -17,7 +17,7 @@ void enqueue_frame(frame_t *frame_queue, frame_t new_frame, uint16_t queue_size)
 	// Rotate all pointers by 1 (placing newest frame at bottom)
 	frame_t newest_frame = frame_queue[0];
 	for (int i = 0; i < queue_size - 1; i++) {
-		frame_queue[i] = frame_queue[i-1];
+		frame_queue[i] = frame_queue[i+1];
 	}
 	frame_queue[queue_size-1] = newest_frame;
 }

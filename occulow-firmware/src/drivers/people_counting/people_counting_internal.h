@@ -18,16 +18,17 @@ typedef struct {
 
 /** @brief People counting configuration */
 typedef struct {
-	uint16_t trigger_column[2];  ///< Columns to detect movement on
-	uint16_t trigger_check_offset[2];  ///< Offsets to check for direction
+	int16_t trigger_column[2];  ///< Columns to detect movement on
+	int16_t trigger_check_offset[2];  ///< Offsets to check for direction
 } pc_config_t;
 
 /** @brief Direction that motion was detected in */
 typedef enum {DIR_IN, DIR_OUT, DIR_NONE} direction_t;
 
 static void initialize_counter(pc_counter_t *counter);
+static void initialize_config(pc_config_t *config);
 static void initialize_frame_stacks(void);
-static direction_t determine_direction(uint16_t frame_index, uint16_t trigger_col, uint16_t offset);
+static direction_t determine_direction(uint16_t frame_index, int16_t trigger_col, int16_t offset);
 static void update_counter(void);
 
 #endif /* PEOPLE_COUNTING_INTERNAL_H_ */
