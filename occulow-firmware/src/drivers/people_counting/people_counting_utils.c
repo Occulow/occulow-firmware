@@ -22,6 +22,40 @@ void enqueue_frame(frame_t *frame_queue, frame_t new_frame, uint16_t queue_size)
 	frame_queue[queue_size-1] = newest_frame;
 }
 
+uint16_t median_at_index(frame_t *frames, uint16_t num_frames, uint16_t index) {
+	frame_elem_t temp_arr[num_frames];
+	frame_elem_t temp;
+	// Copy elems into temp arr
+	for (int i = 0; i < num_frames; i++) {
+		temp_arr[i] = frames[i][index];
+	}
+	
+	// Sort arr
+	for (int i = 0; i < num_frames; i++) {
+		for (int j = i+1; j < num_frames; j++) {
+			if (temp_arr[j] < temp_arr[i]) {
+				temp = temp_arr[i];
+				temp_arr[i] = temp_arr[j];
+				temp_arr[j] = temp;
+			}
+		}
+	}
+	
+	// Return median
+	if (num_frames % 2 == 0) {
+		return ((temp_arr[num_frames/2] + temp_arr[num_frames/2 - 1])/2);
+		} else {
+		return temp_arr[num_frames/2];
+	}
+}
+
+frame_t compute_median_frame(frame_t frame_out, frame_t *frames, uint16_t num_frames) {
+	for (int i = 0; i < GE_FRAME_SIZE; i++) {
+		frame_out[i] = median_at_index(frames, num_frames, i);
+	}
+	return frame_out;
+}
+
 
 bool is_local_max(frame_t frame, uint16_t row, uint16_t col) {
 	frame_elem_t current_max = frame[GET_FRAME_INDEX(row, col)];

@@ -48,6 +48,11 @@ void pc_new_frame(frame_t new_frame) {
 	// Enqueue new_frame into RAW_FRAMES
 	enqueue_frame(RAW_FRAMES, new_frame, NUM_RAW_FRAMES);
 	
+	// Compute and enqueue median frame
+	frame_elem_t median_filtered_frame[GE_FRAME_SIZE];
+	compute_median_frame(median_filtered_frame, RAW_FRAMES, NUM_RAW_FRAMES);
+	enqueue_frame(MEDIAN_FRAMES, median_filtered_frame, NUM_MEDIAN_FRAMES);
+	
 	// Reset counted
 	pc_counter.count_updated = false;
 }
