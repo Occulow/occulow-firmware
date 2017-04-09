@@ -614,6 +614,7 @@
     <Folder Include="src\config\" />
     <Folder Include="src\drivers" />
     <Folder Include="src\drivers\grideye" />
+    <Folder Include="src\drivers\people_counting" />
     <Folder Include="src\drivers\stdio_usart" />
     <Folder Include="src\drivers\pir" />
   </ItemGroup>
@@ -1123,6 +1124,21 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\drivers\grideye\grideye.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\people_counting\people_counting.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\people_counting\people_counting.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\people_counting\people_counting_internal.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\people_counting\people_counting_utils.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\people_counting\people_counting_utils.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\drivers\pir\pir.c">
