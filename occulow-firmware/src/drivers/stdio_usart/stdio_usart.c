@@ -18,6 +18,7 @@ void stdio_init() {
 	stdio_usart_config.pinmux_pad1 = STDIO_SERCOM_PINMUX_PAD1;
 	stdio_usart_config.pinmux_pad2 = STDIO_SERCOM_PINMUX_PAD2;
 	stdio_usart_config.pinmux_pad3 = STDIO_SERCOM_PINMUX_PAD3;
+	stdio_usart_config.baudrate = STDIO_BAUD_RATE;
 	stdio_serial_init(&stdio_usart_module, STDIO_SERCOM_MODULE, &stdio_usart_config);
 	usart_enable(&stdio_usart_module);
 }
