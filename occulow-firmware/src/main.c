@@ -4,10 +4,11 @@
  */
 
 #include <asf.h>
+#include <drivers/stdio_usart/stdio_usart.h>
 #include <drivers/pir/pir.h>
+#include <drivers/lora/lora.h>
 #include <drivers/grideye/grideye.h>
 #include <drivers/people_counting/people_counting.h>
-#include <drivers/stdio_usart/stdio_usart.h>
 
 /**
  * @brief      Runs when the PIR detects motion
@@ -24,9 +25,12 @@ int main (void)
 	system_init();
 	delay_init();
 	stdio_init();
+	lora_init();
 	grideye_init();
 	pc_init();
 	// pir_init(pir_on_wake);  // Init PIR
+	
+	lora_join_otaa();
 
 	double old_in_count = 0;
 	double old_out_count = 0;
@@ -41,9 +45,11 @@ int main (void)
 			out_count = pc_get_out_count();
 			
 			if (in_count > old_in_count || out_count > old_out_count) {
+				lora_send_count((uint16_t) (in_count - old_in_count), 
+					(uint16_t) (out_count - old_out_count));
 				printf("In: %d, Out: %d\r\n", (int) in_count, (int) out_count);		
 				old_in_count = in_count;
-				old_out_count = out_count;		
+				old_out_count = out_count;
 			}
 		}
 	}
