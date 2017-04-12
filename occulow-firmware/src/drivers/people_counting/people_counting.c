@@ -137,10 +137,12 @@ static void initialize_frame_stacks(void) {
 static direction_t determine_direction(uint16_t frame_index, 
 	int16_t trigger_col, int16_t offset) {
 	if (TRIGGER_INDEX >= NUM_MEDIAN_FRAMES - 1 || TRIGGER_INDEX < 1){
-		//TODO: Handle exception
+		printf("Macro TRIGGER_INDEX is invalid: Must be between 0 and NUM_MEDIAN_FRAMES");
+		return DIR_NONE;
 	}
 	if (trigger_col + offset < 0 || trigger_col + offset >= GRID_SIZE) {
-		//TODO: Handle exception
+		printf("Trigger offset/column out of bounds: (%d, %d)", trigger_col, offset);
+		return DIR_NONE;
 	}
 	uint16_t check_col = (uint16_t) (trigger_col + offset);
 	frame_t current_frame = MEDIAN_FRAMES[frame_index];
