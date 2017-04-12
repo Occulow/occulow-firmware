@@ -107,8 +107,8 @@ static void initialize_counter(pc_counter_t *counter)
 static void initialize_config(pc_config_t *config) {
 	config->trigger_column[0] = TRIGGER_COLUNM_2;
 	config->trigger_column[1] = TRIGGER_COLUNM_5;
-	config->trigger_check_offset[0] = CHECK_OFFSET_2;
-	config->trigger_check_offset[1] = CHECK_OFFSET_5;
+	config->trigger_check_offset[0] = CHECK_OFFSET_PLUS_1;
+	config->trigger_check_offset[1] = CHECK_OFFSET_MINUS_1;
 };
 
 /**
