@@ -25,7 +25,7 @@
 
 // Thresholds for detecting motion
 #define TRIGGER_THRESHOLD 10  /// Threshold to detect as motion
-#define MAX_THRESHOLD 5  /// Threshold for heat signature difference in frames
+#define MAX_THRESHOLD 3  /// Threshold for heat signature difference in frames
 
 // Sizes for frames and their elements
 typedef uint16_t *frame_t;
