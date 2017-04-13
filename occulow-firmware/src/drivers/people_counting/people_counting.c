@@ -22,6 +22,7 @@ static uint16_t raw_frame_count = 0;  ///< Number of frames in the RAW_FRAMES
 static bool raw_frames_filled = false;  ///< Whether or not RAW_FRAMES is full
 static pc_counter_t pc_counter;  ///< Counter object
 static pc_config_t pc_config;  ///< Configuration object
+static uint8_t buffer[512];
 
 
 /**
@@ -63,6 +64,15 @@ void pc_new_frame(frame_t new_frame) {
 	}
 	
 	enqueue_frame(MEDIAN_FRAMES, median_filtered_frame, NUM_MEDIAN_FRAMES);
+	
+	uint16_t size = 0;
+	for (int i = 0; i < GE_FRAME_SIZE; i++) {
+		size += sprintf((char *) (buffer + size), "%d,", median_filtered_frame[i]);
+	}
+	buffer[size-1] = '\r';  // Replace last comma with \r
+	buffer[size] = '\n';
+	buffer[size+1] = '\0';
+	printf("%s", buffer);
 	
 	// Reset counted
 	pc_counter.count_updated = false;
@@ -206,9 +216,9 @@ static void update_counter(void) {
 		// Increment count according to number of trigger columns
 		// TODO: Is this math too slow?
 		if (direction == DIR_IN) {
-			pc_counter.in_count = pc_counter.in_count + (1.0/sizeof(pc_config.trigger_column));
+			pc_counter.in_count = pc_counter.in_count + 0.5;
 		} else if (direction == DIR_OUT) {
-			pc_counter.out_count = pc_counter.out_count + (1.0/sizeof(pc_config.trigger_column));
+			pc_counter.out_count = pc_counter.out_count + 0.5;
 		}
 	}
 	
