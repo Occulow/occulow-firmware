@@ -28,8 +28,6 @@ int main (void)
 	pc_init();
 	// pir_init(pir_on_wake);  // Init PIR
 
-	double old_in_count = 0;
-	double old_out_count = 0;
 	double in_count = 0;
 	double out_count = 0;
 	
@@ -40,10 +38,8 @@ int main (void)
 			in_count = pc_get_in_count();
 			out_count = pc_get_out_count();
 			
-			if (in_count > old_in_count || out_count > old_out_count) {
-				printf("In: %d, Out: %d\r\n", (int) in_count, (int) out_count);		
-				old_in_count = in_count;
-				old_out_count = out_count;		
+			if (in_count > 0.0 || out_count > 0.0) {
+				printf("In: %d, Out: %d\r\n", (int) in_count, (int) out_count);
 			}
 		}
 	}

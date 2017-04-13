@@ -76,6 +76,8 @@ void pc_new_frame(frame_t new_frame) {
 	
 	// Reset counted
 	pc_counter.count_updated = false;
+	pc_counter.in_count = 0.0;
+	pc_counter.out_count = 0.0;
 }
 
 /**
