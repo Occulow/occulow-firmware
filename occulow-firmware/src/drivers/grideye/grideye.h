@@ -18,6 +18,7 @@
 #define GE_I2C_MODULE SERCOM1
 #define GE_SERCOM_PAD0 PINMUX_PA00D_SERCOM1_PAD0
 #define GE_SERCOM_PAD1 PINMUX_PA01D_SERCOM1_PAD1
+#define GE_PWR_PIN PIN_PA08
 
 void grideye_init(void);
 bool ge_is_sleeping(void);
