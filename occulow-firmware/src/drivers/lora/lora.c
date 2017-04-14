@@ -285,6 +285,18 @@ void lora_send_count(uint16_t ingress, uint16_t egress){
 	lora_send_data((uint8_t *) counts, n);
 }
 
+/**
+ * @brief      Sends an integer over the Lora Network
+ *
+ * @param	   count	Integer to send over the network
+ */
+void lora_send_count_old(int delta) {
+	uint8_t counts[8];
+	sprintf((char *) counts, "%02X", delta);
+	uint16_t cmd_length = sprintf((char *) tx_buffer, SEND_UNCONF_CMD, counts);
+	lora_send_cmd(tx_buffer, cmd_length);
+}
+
 static void str_to_hex(uint8_t *output, uint8_t *string, uint16_t length) {
 	// Assumes length of output is at least 2*length
 	for(uint16_t i=0; i < length; i++) {

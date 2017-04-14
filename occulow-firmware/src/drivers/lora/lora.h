@@ -34,6 +34,7 @@ void lora_join_abp(void);
 void lora_reset(void);
 lora_status_t lora_send_cmd(lora_cmd_t cmd, uint16_t len);
 void lora_send_data(uint8_t *string, uint16_t len);
+void lora_send_count_old(int delta);
 void lora_send_count(uint16_t ingress, uint16_t egress);
 
 #endif /* LORA_H_ */
