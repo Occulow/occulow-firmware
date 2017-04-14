@@ -40,7 +40,7 @@ int main (void)
 	while(1) {
 		if (counter == 300) {
 			counter = 0;
-			lora_send_count_old((int) (period_in_count - period_out_count));
+			lora_send_count(period_in_count, period_out_count);
 			period_in_count = 0;
 			period_out_count = 0;
 		}
