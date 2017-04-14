@@ -3,7 +3,7 @@
  *
  * Created: 3/24/2017 12:08:35 PM
  *  Author: mazacar8
- */ 
+ */
 
 #ifndef LORA_H_
 #define LORA_H_
@@ -15,15 +15,17 @@
 #define LORA_SERCOM_PINMUX_PAD3 PINMUX_PA19C_SERCOM1_PAD3
 #define LORA_USART_MUX_SETTING USART_RX_3_TX_2_XCK_3
 #define LORA_USART_BAUD 57600
+#define LORA_POWER_PIN PIN_PA14
 
 #define LORA_RESET_PIN PIN_PA15
 
 #define MAX_JOIN_ATTEMPTS 5
 #define MAX_STATUS_CHECKS 5
+#define MAX_READ_ATTEMPTS 100
 #define LORA_RX_BUFFER_SIZE 100
 #define LORA_TX_BUFFER_SIZE 100
 
-typedef enum {OK, ACCEPTED, DENIED} lora_status_t;
+typedef enum {OK, ACCEPTED, DENIED, ERROR} lora_status_t;
 typedef uint8_t *lora_cmd_t;
 
 void lora_init(void);
