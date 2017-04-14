@@ -24,6 +24,7 @@ static pc_counter_t pc_counter;  ///< Counter object
 static pc_config_t pc_config;  ///< Configuration object
 static uint8_t buffer[512];
 static int frame_count = 0;
+static int last_frame_counted = 0;
 
 
 /**
@@ -171,7 +172,7 @@ static direction_t determine_direction(uint16_t frame_index,
 		for (uint16_t i = 1; i < 3; i++) {
 			frame_t past_frame = MEDIAN_FRAMES[frame_index - i];
 			uint16_t past_max_index = get_max_index_in_col(past_frame, check_col);
-			uint16_t past_max = past_frame[GET_FRAME_INDEX(past_max_index, trigger_col)];
+			uint16_t past_max = past_frame[GET_FRAME_INDEX(past_max_index, check_col)];
 			if (abs(past_max - current_max) <= MAX_THRESHOLD
 				&& is_local_max(past_frame, past_max_index, check_col)) {
 				if (offset < 0) {
@@ -187,7 +188,7 @@ static direction_t determine_direction(uint16_t frame_index,
 		for (uint16_t i = 1; i < 3; i++) {
 			frame_t future_frame = MEDIAN_FRAMES[frame_index + i];
 			uint16_t future_max_index = get_max_index_in_col(future_frame, check_col);
-			uint16_t future_max = future_frame[GET_FRAME_INDEX(future_max_index, trigger_col)];
+			uint16_t future_max = future_frame[GET_FRAME_INDEX(future_max_index, check_col)];
 			if (abs(future_max - current_max) <= MAX_THRESHOLD
 				&& is_local_max(future_frame, future_max_index, check_col)) {
 				if (offset < 0) {
@@ -218,10 +219,14 @@ static void update_counter(void) {
 
 		// Increment count according to number of trigger columns
 		// TODO: Is this math too slow?
-		if (direction == DIR_IN) {
-			pc_counter.in_count = pc_counter.in_count + 0.5;
-		} else if (direction == DIR_OUT) {
-			pc_counter.out_count = pc_counter.out_count + 0.5;
+		if (last_frame_counted < frame_count - 2) {
+			if (direction == DIR_IN) {
+				pc_counter.in_count = pc_counter.in_count + 0.5;
+				last_frame_counted = frame_count;
+			} else if (direction == DIR_OUT) {
+				pc_counter.out_count = pc_counter.out_count + 0.5;
+				last_frame_counted = frame_count;
+			}
 		}
 	}
 
