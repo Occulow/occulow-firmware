@@ -29,27 +29,29 @@ int main (void)
 	grideye_init();
 	pc_init();
 	// pir_init(pir_on_wake);  // Init PIR
-	
+
 	lora_join_otaa();
 
-	double old_in_count = 0;
-	double old_out_count = 0;
 	double in_count = 0;
 	double out_count = 0;
-	
+
 	while(1) {
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);
 			pc_new_frame(grideye_frame);
 			in_count = pc_get_in_count();
 			out_count = pc_get_out_count();
-			
-			if (in_count > old_in_count || out_count > old_out_count) {
-				lora_send_count((uint16_t) (in_count - old_in_count), 
-					(uint16_t) (out_count - old_out_count));
-				printf("In: %d, Out: %d\r\n", (int) in_count, (int) out_count);		
-				old_in_count = in_count;
-				old_out_count = out_count;
+
+			if (in_count > 0.0 || out_count > 0.0) {
+				if (((double) ((int) in_count)) < in_count && ((double) ((int) out_count)) < out_count) {
+					printf("D(%d.5,%d.5)\r\n", (int) in_count, (int) out_count);
+				} else if (((double) ((int) in_count)) < in_count) {
+					printf("D(%d.5,%d)\r\n", (int) in_count, (int) out_count);
+				} else if (((double) ((int) out_count)) < out_count) {
+					printf("D(%d,%d.5)\r\n", (int) in_count, (int) out_count);
+				} else {
+					printf("D(%d,%d)\r\n", (int) in_count, (int) out_count);
+				}
 			}
 		}
 	}

@@ -31,6 +31,7 @@ struct i2c_master_module i2c_master_instance;
 
 uint8_t read_byte(uint8_t addr);
 void write_byte(uint8_t addr, uint8_t *data, uint8_t length);
+static void init_power_pins(void);
 
 void grideye_init(void)
 {
@@ -46,6 +47,19 @@ void grideye_init(void)
 	/* Initialize and enable device with config. */
 	i2c_master_init(&i2c_master_instance, GE_I2C_MODULE, &config_i2c_master);
 	i2c_master_enable(&i2c_master_instance);
+	init_power_pins();
+}
+
+
+static void init_power_pins(void) {
+	// Configure a pinmux for output
+	struct port_config pinmux_out_cfg;
+	port_get_config_defaults(&pinmux_out_cfg);
+	pinmux_out_cfg.direction = PORT_PIN_DIR_OUTPUT;
+	pinmux_out_cfg.input_pull = PORT_PIN_PULL_NONE;
+
+	port_pin_set_config(GE_PWR_PIN, &pinmux_out_cfg);
+	port_pin_set_output_level(GE_PWR_PIN, false);
 }
 
 /**

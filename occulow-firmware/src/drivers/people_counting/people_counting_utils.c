@@ -44,7 +44,7 @@ uint16_t median_at_index(frame_t *frames, uint16_t num_frames, uint16_t index) {
 	// Return median
 	if (num_frames % 2 == 0) {
 		return ((temp_arr[num_frames/2] + temp_arr[num_frames/2 - 1])/2);
-		} else {
+	} else {
 		return temp_arr[num_frames/2];
 	}
 }
