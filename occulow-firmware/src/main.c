@@ -28,7 +28,7 @@ int main (void)
 	lora_init();
 	grideye_init();
 	pc_init();
-	// pir_init(pir_on_wake);  // Init PIR
+	pir_init(pir_on_wake);
 
 	lora_join_otaa();
 
