@@ -87,7 +87,6 @@ void quick_sort (frame_t arr, int16_t l, int16_t h)
 
 uint16_t median_at_index(frame_t *frames, uint16_t num_frames, uint16_t index) {
 	frame_elem_t temp_arr[num_frames];
-	frame_elem_t temp;
 	// Copy elems into temp arr
 	for (int i = 0; i < num_frames; i++) {
 		temp_arr[i] = frames[i][index];
