@@ -22,6 +22,35 @@ void enqueue_frame(frame_t *frame_queue, frame_t new_frame, uint16_t queue_size)
 	frame_queue[queue_size-1] = newest_frame;
 }
 
+uint16_t partition(frame_elem_t arr[], uint16_t low, uint16_t high) {
+	uint16_t pivot, i, j, temp;
+	pivot = arr[high];
+	i = low - 1;
+	
+	for (j = low; j <= high + 1; j++) {
+		if (arr[j] <= pivot) {
+			i++;
+			temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+		}
+	}
+	temp = arr[i+1];
+	arr[i+1] = arr[high];
+	arr[high] = temp;
+	return (i+1);
+}
+
+void quick_sort(frame_elem_t arr[], uint16_t low, uint16_t high) {
+	uint16_t j;
+	if (low < high) {
+		j = partition(arr, low, high);
+		quick_sort(arr, low, j-1);
+		quick_sort(arr, j+1, high);
+	}
+} 
+
+
 uint16_t median_at_index(frame_t *frames, uint16_t num_frames, uint16_t index) {
 	frame_elem_t temp_arr[num_frames];
 	frame_elem_t temp;
@@ -31,15 +60,7 @@ uint16_t median_at_index(frame_t *frames, uint16_t num_frames, uint16_t index) {
 	}
 	
 	// Sort arr
-	for (int i = 0; i < num_frames; i++) {
-		for (int j = i+1; j < num_frames; j++) {
-			if (temp_arr[j] < temp_arr[i]) {
-				temp = temp_arr[i];
-				temp_arr[i] = temp_arr[j];
-				temp_arr[j] = temp;
-			}
-		}
-	}
+	quick_sort(temp_arr, 0, num_frames-1);
 	
 	// Return median
 	if (num_frames % 2 == 0) {
