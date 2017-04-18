@@ -51,15 +51,20 @@ void init_pir_interrupt(extint_callback_t on_wake) {
 		extint_chan_clear_detected(PIR_EIC_LINE);
 	}
 
-	// Register and enable on_wake callback function
+	// Register on_wake callback function
 	extint_register_callback(on_wake, PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
-	extint_chan_enable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 }
 
 void pir_enable_interrupt(void) {
+	while(extint_chan_is_detected(PIR_EIC_LINE)) {
+		extint_chan_clear_detected(PIR_EIC_LINE);
+	}
 	extint_chan_enable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 }
 
 void pir_disable_interrupt(void) {
+	while(extint_chan_is_detected(PIR_EIC_LINE)) {
+		extint_chan_clear_detected(PIR_EIC_LINE);
+	}
 	extint_chan_disable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 }
