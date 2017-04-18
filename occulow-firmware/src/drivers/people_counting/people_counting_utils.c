@@ -21,14 +21,13 @@ void enqueue_frame(frame_t *frame_queue, frame_t new_frame, uint16_t queue_size)
 	}
 	frame_queue[queue_size-1] = newest_frame;
 }
-// A utility function to swap two elements
-void swap (frame_elem_t *a, frame_elem_t *b ) {
+
+void swap (frame_elem_t *a, frame_elem_t *b) {
 	frame_elem_t t = *a;
 	*a = *b;
 	*b = t;
 }
 
-/* This function is same in both iterative and recursive*/
 int16_t partition (frame_t arr, int16_t l, int16_t h) {
 	frame_elem_t x = arr[h];
 	int16_t i = (l - 1);
@@ -43,43 +42,26 @@ int16_t partition (frame_t arr, int16_t l, int16_t h) {
 	return (i + 1);
 }
 
-void quick_sort (frame_t arr, int16_t l, int16_t h)
-{
-    // Create an auxiliary stack
-    int16_t stack[ h - l + 1 ];
-
-    // initialize top of stack
+void quick_sort (frame_t arr, int16_t l, int16_t h) {
+    int16_t stack[h - l + 1];
     int16_t top = -1;
 
-    // push initial values of l and h to stack
-    stack[ ++top ] = l;
-    stack[ ++top ] = h;
+    stack[++top] = l;
+    stack[++top] = h;
 
-    // Keep popping from stack while is not empty
-    while ( top >= 0 )
-    {
-        // Pop h and l
-        h = stack[ top-- ];
-        l = stack[ top-- ];
+    while (top >= 0) {
+        h = stack[top--];
+        l = stack[top--];
 
-        // Set pivot element at its correct position
-        // in sorted array
-        int16_t p = partition( arr, l, h );
+        int16_t p = partition(arr, l, h);
 
-        // If there are elements on left side of pivot,
-        // then push left side to stack
-        if ( p-1 > l )
-        {
-            stack[ ++top ] = l;
-            stack[ ++top ] = p - 1;
+        if (p-1 > l) {
+            stack[++top] = l;
+            stack[++top] = p - 1;
         }
-
-        // If there are elements on right side of pivot,
-        // then push right side to stack
-        if ( p+1 < h )
-        {
-            stack[ ++top ] = p + 1;
-            stack[ ++top ] = h;
+        if (p+1 < h) {
+            stack[++top] = p + 1;
+            stack[++top] = h;
         }
     }
 }
@@ -104,6 +86,7 @@ uint16_t median_at_index(frame_t *frames, uint16_t num_frames, uint16_t index) {
 }
 
 frame_t compute_median_frame(frame_t frame_out, frame_t *frames, uint16_t num_frames) {
+	// Find median for each element in the frame
 	for (int i = 0; i < GE_FRAME_SIZE; i++) {
 		frame_out[i] = median_at_index(frames, num_frames, i);
 	}
