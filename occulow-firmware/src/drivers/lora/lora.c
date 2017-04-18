@@ -56,6 +56,9 @@ void lora_init() {
 	lora_send_cmd(tx_buffer, cmd_length);
 }
 
+/**
+ * @brief      Initializes the power for the LoRa module and turns it on
+ */
 static void init_power_pins() {
 	struct port_config power_gpio_config;
 	port_get_config_defaults(&power_gpio_config);
@@ -67,6 +70,9 @@ static void init_power_pins() {
 	port_pin_set_output_level(LORA_POWER_PIN, false);
 }
 
+/**
+ * @brief      Initializes the UART SERCOM for LoRa
+ */
 static void init_usart(void) {
 	struct usart_config lora_usart_config;
 	usart_get_config_defaults(&lora_usart_config);
@@ -83,6 +89,9 @@ static void init_usart(void) {
 	usart_enable(&lora_usart_module);
 }
 
+/**
+ * @brief      Initializes the reset_n pin for LoRa module
+ */
 static void init_reset(void) {
 	struct port_config reset_config;
 	port_get_config_defaults(&reset_config);
@@ -103,7 +112,6 @@ void lora_reset(){
 
 /**
  * @brief      Switches off all but channels 0-7 for Lora transmit
- *
  */
 void setup_channels() {
 	uint16_t cmd_length;
@@ -121,7 +129,6 @@ void setup_channels() {
 
 /**
  * @brief      Attempts to join the Lora network a maximum of 5 times
- *
  */
 void lora_join_otaa() {
 	int i,j;
@@ -271,8 +278,15 @@ void lora_send_count(uint16_t ingress, uint16_t egress){
 	lora_send_cmd(tx_buffer, cmd_length);
 }
 
+/**
+ * @brief      Converts a character string in to a hex string
+ *
+ * @param      output  Output buffer (size >= 2*length + 1)
+ * @param      string  Character string to convert
+ * @param[in]  length  Length of character string
+ */
 static void str_to_hex(uint8_t *output, uint8_t *string, uint16_t length) {
-	// Assumes length of output is at least 2*length
+	// Assumes length of output is at least 2*length + 1
 	for(uint16_t i=0; i < length; i++) {
 		sprintf((char *) &output[i*2], "%02X", string[i]);
 	}
