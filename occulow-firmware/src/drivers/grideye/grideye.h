@@ -3,7 +3,7 @@
  *
  * Created: 3/1/2017 8:54:53 PM
  *  Author: Terence Sun (tsun1215)
- */ 
+ */
 
 #ifndef GRIDEYE_H_
 #define GRIDEYE_H_
@@ -15,9 +15,9 @@
 #define GE_MODE_STANDBY_2 0x21
 
 #define GE_I2C_BUFFER_TIMEOUT 10000
-#define GE_I2C_MODULE SERCOM1
-#define GE_SERCOM_PAD0 PINMUX_PA00D_SERCOM1_PAD0
-#define GE_SERCOM_PAD1 PINMUX_PA01D_SERCOM1_PAD1
+#define GE_I2C_MODULE SERCOM0
+#define GE_SERCOM_PAD0 PINMUX_PA04D_SERCOM0_PAD0
+#define GE_SERCOM_PAD1 PINMUX_PA05D_SERCOM0_PAD1
 #define GE_PWR_PIN PIN_PA08
 
 void grideye_init(void);

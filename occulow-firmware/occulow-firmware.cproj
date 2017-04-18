@@ -30,13 +30,14 @@
       <framework-data>
         <options>
           <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common2.services.delay" value="Add" config="systick" content-id="Atmel.ASF" />
           <option id="sam0.drivers.extint" value="Add" config="callback" content-id="Atmel.ASF" />
+          <option id="sam0.drivers.port" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam0.drivers.sercom.i2c.master" value="Add" config="polled" content-id="Atmel.ASF" />
           <option id="sam0.drivers.sercom.usart" value="Add" config="polled" content-id="Atmel.ASF" />
           <option id="sam0.drivers.system" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam0.utils.stdio.stdio_serial" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="sam0.drivers.port" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common2.services.delay" value="Add" config="systick" content-id="Atmel.ASF" />
+          <option id="sam0.drivers.system.power" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam0.utils.linker_scripts" value="Add" config="" content-id="Atmel.ASF" />
         </options>
         <configurations />
@@ -614,6 +615,7 @@
     <Folder Include="src\config\" />
     <Folder Include="src\drivers" />
     <Folder Include="src\drivers\grideye" />
+    <Folder Include="src\drivers\lora" />
     <Folder Include="src\drivers\people_counting" />
     <Folder Include="src\drivers\stdio_usart" />
     <Folder Include="src\drivers\pir" />
@@ -1124,6 +1126,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\drivers\grideye\grideye.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\lora\lora.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\lora\lora.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\drivers\people_counting\people_counting.c">
