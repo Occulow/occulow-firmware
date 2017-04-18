@@ -6,26 +6,11 @@
  */
 
 #include <drivers/lora/lora.h>
+#include <drivers/lora/lora_commands.h>
 
 static struct usart_module lora_usart_module;
 static uint8_t rx_buffer[LORA_RX_BUFFER_SIZE];
 static uint8_t tx_buffer[LORA_TX_BUFFER_SIZE];
-
-static const char FACTORY_RESET_CMD[] = "sys factoryRESET\r\n";
-static const char SET_APPEUI_CMD[] = "mac set appeui %s\r\n";
-static const char SET_DEVEUI_CMD[] = "mac set deveui %s\r\n";
-static const char SET_APPKEY_CMD[] = "mac set appkey %s\r\n";
-static const char SET_DATARATE_CMD[] = "mac set dr %s\r\n";
-static const char SET_PWRIDX_CMD[] = "mac set pwridx %s\r\n";
-static const char SET_ADR_CMD[] = "mac set adr %s\r\n";
-static const char SET_DEVADDR_CMD[] = "mac set devaddr %s\r\n";
-static const char SET_PWR_CMD[] = "radio set pwr %s\r\n";
-static const char SET_PRLEN_CMD[] = "radio set prlen %s\r\n";
-static const char SAVE_CMD[] = "mac save\r\n";
-static const char SET_CHANNEL_STATUS_CMD[] = "mac set ch status %d %s\r\n";
-static const char JOIN_OTAA_CMD[] = "mac join otaa\r\n";
-static const char JOIN_ABP_CMD[] = "mac join abp\r\n";
-static const char SEND_UNCONF_CMD[] = "mac tx uncnf 1 %s\r\n";
 
 static void init_power_pins(void);
 static void init_usart(void);
