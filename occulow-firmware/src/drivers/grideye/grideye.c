@@ -29,10 +29,13 @@ static uint8_t ge_mode = GE_MODE_NORMAL;
 /* Init software module. */
 struct i2c_master_module i2c_master_instance;
 
-uint8_t read_byte(uint8_t addr);
-void write_byte(uint8_t addr, uint8_t *data, uint8_t length);
+static uint8_t read_byte(uint8_t addr);
+static void write_byte(uint8_t addr, uint8_t *data, uint8_t length);
 static void init_power_pins(void);
 
+/**
+ * @brief      Initializes the grideye
+ */
 void grideye_init(void)
 {
 	/* Initialize config structure and software module. */
@@ -51,6 +54,9 @@ void grideye_init(void)
 }
 
 
+/**
+ * @brief      Initializes the power pins and turns the device on
+ */
 static void init_power_pins(void) {
 	// Configure a pinmux for output
 	struct port_config pinmux_out_cfg;
@@ -146,7 +152,7 @@ void ge_get_frame(uint16_t *frame_buffer)
  *
  * @return     Value read from the address
  */
-uint8_t read_byte(uint8_t addr) {
+static uint8_t read_byte(uint8_t addr) {
 	uint16_t timeout = 0;
 	struct i2c_master_packet packet = {
 		.address = GE_SLAVE_ADDRESS,
@@ -187,7 +193,7 @@ uint8_t read_byte(uint8_t addr) {
  * @param      data    Data to write
  * @param[in]  length  Length of data
  */
-void write_byte(uint8_t addr, uint8_t *data, uint8_t length) {
+static void write_byte(uint8_t addr, uint8_t *data, uint8_t length) {
 	uint16_t timeout = 0;
 	struct i2c_master_packet packet = {
 		.address = GE_SLAVE_ADDRESS,
