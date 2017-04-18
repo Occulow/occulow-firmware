@@ -55,3 +55,11 @@ void init_pir_interrupt(extint_callback_t on_wake) {
 	extint_register_callback(on_wake, PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 	extint_chan_enable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 }
+
+void pir_enable_interrupt(void) {
+	extint_chan_enable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
+}
+
+void pir_disable_interrupt(void) {
+	extint_chan_disable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
+}

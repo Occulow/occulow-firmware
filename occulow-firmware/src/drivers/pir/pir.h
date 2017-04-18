@@ -26,5 +26,7 @@
  * @param[in]  on_wake  Callback function to call on wakeup
  */
 void pir_init(extint_callback_t on_wake);
+void pir_enable_interrupt(void);
+void pir_disable_interrupt(void);
 
 #endif /* PIR_H_ */
