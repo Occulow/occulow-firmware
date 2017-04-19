@@ -21,6 +21,7 @@ static void sleep_device(void);
  */
 void pir_on_wake(void) {
 	// TODO: Implement what happens when the PIR sends an interrupt
+	printf("Wake!\r\n");
 }
 
 static void init_standby(void) {
@@ -30,6 +31,7 @@ static void init_standby(void) {
 }
 
 static void sleep_device(void) {
+	printf("Sleeping\r\n");
 	system_set_sleepmode(SYSTEM_SLEEPMODE_STANDBY);
 	system_sleep();
 }
@@ -61,7 +63,9 @@ int main (void)
 			lora_send_count(period_in_count, period_out_count);
 			period_in_count = 0;
 			period_out_count = 0;
+			pir_enable_interrupt();
 			sleep_device();
+			pir_disable_interrupt();
 		}
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);
