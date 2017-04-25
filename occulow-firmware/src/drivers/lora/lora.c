@@ -213,15 +213,20 @@ lora_status_t lora_send_cmd(lora_cmd_t cmd, uint16_t len) {
 static bool read_response() {
 	uint16_t buffer_size = 0;
 	uint16_t new_char = 0;
-	uint8_t err_count = 0;
+	uint16_t err_count = 0;
 	enum status_code err;
 
 	// Block and read 2 characters always (all responses are at minimum 2 characters)
 	while ((err = usart_read_buffer_wait(&lora_usart_module, (uint8_t *) &rx_buffer, 2)) != STATUS_OK) {
 		// printf("Fake error reading buffer: %x\r\n", err);
+		if (++err_count > MAX_READ_ATTEMPTS) {
+			printf("Error reading buffer: reached maximum read attempts.\r\n");
+			return false;
+		}
 	}
 
 	// Read remaining characters
+	err_count = 0;
 	buffer_size += 2;
 	bool timed_out = false;
 	while (new_char != '\n') {
