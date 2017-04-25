@@ -48,7 +48,7 @@ int main (void)
 	pc_init();
 	pir_init(pir_on_wake);
 
-	// lora_join_otaa();
+	lora_join_otaa();
 
 	double in_count = 0;
 	double out_count = 0;
@@ -56,11 +56,11 @@ int main (void)
 	double period_out_count = 0;
 
 	while(1) {
-		if (inactivity_counter == 100) {
+		if (inactivity_counter == 50) {
 			// Each grideye cycle is ~100ms (since it claims 10FPS), so each tick of the
 			//  inactivity counter is assumed to be 100ms.
 			inactivity_counter = 0;
-			// lora_send_count(period_in_count, period_out_count);
+			lora_send_count(period_in_count, period_out_count);
 			period_in_count = 0;
 			period_out_count = 0;
 			ge_set_mode(GE_MODE_SLEEP);
@@ -70,6 +70,7 @@ int main (void)
 			pir_disable_interrupt();
 			//port_pin_set_output_level(GE_PWR_PIN, false);
 			ge_set_mode(GE_MODE_NORMAL);
+			pc_flush_buffer();
 		}
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);

@@ -53,33 +53,40 @@ void pc_new_frame(frame_t new_frame) {
 	enqueue_frame(RAW_FRAMES, new_frame, NUM_RAW_FRAMES);
 
 	// Compute and enqueue median frame
-	frame_elem_t median_filtered_frame[GE_FRAME_SIZE];
-	compute_median_frame(median_filtered_frame, RAW_FRAMES, NUM_RAW_FRAMES);
+	if (raw_frames_filled) {
+		frame_elem_t median_filtered_frame[GE_FRAME_SIZE];
+		compute_median_frame(median_filtered_frame, RAW_FRAMES, NUM_RAW_FRAMES);
 
-	// Subtract median from the new frame
-	for (int i = 0; i < GE_FRAME_SIZE; i++) {
-		if (new_frame[i] < median_filtered_frame[i]) {
-			median_filtered_frame[i] = 0;
-		} else {
-			median_filtered_frame[i] = new_frame[i] - median_filtered_frame[i];
+		// Subtract median from the new frame
+		for (int i = 0; i < GE_FRAME_SIZE; i++) {
+			if (new_frame[i] < median_filtered_frame[i]) {
+				median_filtered_frame[i] = 0;
+				} else {
+				median_filtered_frame[i] = new_frame[i] - median_filtered_frame[i];
+			}
 		}
-	}
 
-	enqueue_frame(MEDIAN_FRAMES, median_filtered_frame, NUM_MEDIAN_FRAMES);
+		enqueue_frame(MEDIAN_FRAMES, median_filtered_frame, NUM_MEDIAN_FRAMES);
 
-	uint16_t size = 0;
-	for (int i = 0; i < GE_FRAME_SIZE; i++) {
-		size += sprintf((char *) (buffer + size), "%d,", median_filtered_frame[i]);
+		uint16_t size = 0;
+		for (int i = 0; i < GE_FRAME_SIZE; i++) {
+			size += sprintf((char *) (buffer + size), "%d,", median_filtered_frame[i]);
+		}
+		buffer[size-1] = '\r';  // Replace last comma with \r
+		buffer[size] = '\n';
+		buffer[size+1] = '\0';
+		printf("F%d:%s", ++frame_count, buffer);
 	}
-	buffer[size-1] = '\r';  // Replace last comma with \r
-	buffer[size] = '\n';
-	buffer[size+1] = '\0';
-	printf("F%d:%s", ++frame_count, buffer);
 
 	// Reset counted
 	pc_counter.count_updated = false;
 	pc_counter.in_count = 0.0;
 	pc_counter.out_count = 0.0;
+}
+
+void pc_flush_buffer(){
+	raw_frame_count = 0;
+	raw_frames_filled = false;
 }
 
 /**
