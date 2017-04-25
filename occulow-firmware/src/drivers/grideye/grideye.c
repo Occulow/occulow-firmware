@@ -38,6 +38,7 @@ static void init_power_pins(void);
  */
 void grideye_init(void)
 {
+	init_power_pins();
 	/* Initialize config structure and software module. */
 	struct i2c_master_config config_i2c_master;
 	i2c_master_get_config_defaults(&config_i2c_master);
@@ -46,11 +47,14 @@ void grideye_init(void)
 	config_i2c_master.buffer_timeout = GE_I2C_BUFFER_TIMEOUT;
 	config_i2c_master.pinmux_pad0 = GE_SERCOM_PAD0;
 	config_i2c_master.pinmux_pad1 = GE_SERCOM_PAD1;
-	
+
 	/* Initialize and enable device with config. */
 	i2c_master_init(&i2c_master_instance, GE_I2C_MODULE, &config_i2c_master);
 	i2c_master_enable(&i2c_master_instance);
-	init_power_pins();
+
+	/* Set to normal mode */
+	ge_mode = GE_MODE_SLEEP;
+	ge_set_mode(GE_MODE_NORMAL);
 }
 
 
@@ -161,7 +165,7 @@ static uint8_t read_byte(uint8_t addr) {
 		.high_speed = false,
 		.hs_master_code = 0x0,
 	};
-	
+
 	/* Write addr to read */
 	ge_write_buffer[0] = addr;
 	packet.data = ge_write_buffer;
@@ -171,7 +175,7 @@ static uint8_t read_byte(uint8_t addr) {
 			break;
 		}
 	}
-	
+
 	/* Read value */
 	timeout = 0;
 	packet.data = ge_read_buffer;
@@ -182,7 +186,7 @@ static uint8_t read_byte(uint8_t addr) {
 			break;
 		}
 	}
-	
+
 	return ge_read_buffer[0];
 }
 
