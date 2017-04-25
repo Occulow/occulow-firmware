@@ -23,6 +23,9 @@ void pir_init(extint_callback_t on_wake) {
 	init_pir_interrupt(on_wake);
 }
 
+/**
+ * @brief      Initializes the power pin for PIR
+ */
 void init_power_pins(void) {
 	// Configure a pinmux for output
 	struct port_config pinmux_out_cfg;
@@ -35,6 +38,12 @@ void init_power_pins(void) {
 	port_pin_set_output_level(PIR_PWR_CTRL, false);
 }
 
+/**
+ * @brief      Initializes the interrupt controller to call on_wake for PIR
+ *             interrupts
+ *
+ * @param[in]  on_wake  Function to call on a PIR interrupt
+ */
 void init_pir_interrupt(extint_callback_t on_wake) {
 	struct extint_chan_conf config_extint_chan;
 	extint_chan_get_config_defaults(&config_extint_chan);
@@ -42,7 +51,7 @@ void init_pir_interrupt(extint_callback_t on_wake) {
 	// Set external interrupt configuration
 	config_extint_chan.gpio_pin = PIR_PORT;
 	config_extint_chan.gpio_pin_mux = PIR_EIC_PINMUX;
-	config_extint_chan.gpio_pin_pull = EXTINT_PULL_UP;
+	config_extint_chan.gpio_pin_pull = EXTINT_PULL_DOWN;
 	config_extint_chan.detection_criteria = EXTINT_DETECT_RISING;
 	extint_chan_set_config(PIR_EIC_LINE, &config_extint_chan);
 
@@ -51,15 +60,28 @@ void init_pir_interrupt(extint_callback_t on_wake) {
 		extint_chan_clear_detected(PIR_EIC_LINE);
 	}
 
-	// Register and enable on_wake callback function
+	// Register on_wake callback function
 	extint_register_callback(on_wake, PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
-	extint_chan_enable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 }
 
+/**
+ * @brief      Enable interrupts from the PIR
+ */
 void pir_enable_interrupt(void) {
+	// Clear previous interrupts
+	while(extint_chan_is_detected(PIR_EIC_LINE)) {
+		extint_chan_clear_detected(PIR_EIC_LINE);
+	}
 	extint_chan_enable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 }
 
+/**
+ * @brief      Disables interrupts from the PIR
+ */
 void pir_disable_interrupt(void) {
+	// Clear previous interrupts
+	while(extint_chan_is_detected(PIR_EIC_LINE)) {
+		extint_chan_clear_detected(PIR_EIC_LINE);
+	}
 	extint_chan_disable_callback(PIR_EIC_LINE, EXTINT_CALLBACK_TYPE_DETECT);
 }

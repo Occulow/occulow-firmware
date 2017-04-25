@@ -13,7 +13,7 @@
 #define GRID_SIZE 8
 #define NUM_MEDIAN_FRAMES 7
 #define MEDIAN_FRAME_CHUNK_SIZE (NUM_MEDIAN_FRAMES * GE_FRAME_SIZE)
-#define NUM_RAW_FRAMES 10
+#define NUM_RAW_FRAMES 6
 #define RAW_FRAME_CHUNK_SIZE (NUM_RAW_FRAMES * GE_FRAME_SIZE)
 
 // Defines for triggers
@@ -33,6 +33,7 @@ typedef uint16_t frame_elem_t;
 
 void pc_init(void);
 void pc_new_frame(uint16_t *new_frame);
+void pc_flush_buffer(void);
 double pc_get_in_count(void);
 double pc_get_out_count(void);
 

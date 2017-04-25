@@ -10,25 +10,43 @@
 #include <drivers/grideye/grideye.h>
 #include <drivers/people_counting/people_counting.h>
 
+static uint32_t inactivity_counter = 0;
+
+void pir_on_wake(void);
+static void init_standby(void);
+static void sleep_device(void);
+
 /**
  * @brief      Runs when the PIR detects motion
  */
-void pir_on_wake(void);
-
 void pir_on_wake(void) {
 	// TODO: Implement what happens when the PIR sends an interrupt
+	printf("Wake!\r\n");
 }
-static uint32_t counter = 0;
+
+static void init_standby(void) {
+	struct system_standby_config standby_conf;
+	system_standby_get_config_defaults(&standby_conf);
+	system_standby_set_config(&standby_conf);
+}
+
+static void sleep_device(void) {
+	printf("Sleeping\r\n");
+	system_set_sleepmode(SYSTEM_SLEEPMODE_STANDBY);
+	system_sleep();
+}
+
 int main (void)
 {
 	frame_elem_t grideye_frame[GE_FRAME_SIZE];
 	system_init();
 	delay_init();
+	init_standby();
 	stdio_init();
 	lora_init();
 	grideye_init();
 	pc_init();
-	// pir_init(pir_on_wake);  // Init PIR
+	pir_init(pir_on_wake);
 
 	lora_join_otaa();
 
@@ -38,11 +56,21 @@ int main (void)
 	double period_out_count = 0;
 
 	while(1) {
-		if (counter == 300) {
-			counter = 0;
+		if (inactivity_counter == 50) {
+			// Each grideye cycle is ~100ms (since it claims 10FPS), so each tick of the
+			//  inactivity counter is assumed to be 100ms.
+			inactivity_counter = 0;
 			lora_send_count(period_in_count, period_out_count);
 			period_in_count = 0;
 			period_out_count = 0;
+			ge_set_mode(GE_MODE_SLEEP);
+			//port_pin_set_output_level(GE_PWR_PIN, true);
+			pir_enable_interrupt();
+			sleep_device();
+			pir_disable_interrupt();
+			//port_pin_set_output_level(GE_PWR_PIN, false);
+			ge_set_mode(GE_MODE_NORMAL);
+			pc_flush_buffer();
 		}
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);
@@ -62,9 +90,13 @@ int main (void)
 				}
 				period_in_count += in_count;
 				period_out_count += out_count;
-			}
 
-			counter++;
+				// Reset inactivity counter
+				inactivity_counter = 0;
+			} else {
+				// Increase inactivity counter
+				inactivity_counter++;
+			}
 		}
 	}
 }
