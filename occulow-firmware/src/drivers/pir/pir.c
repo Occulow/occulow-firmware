@@ -51,7 +51,7 @@ void init_pir_interrupt(extint_callback_t on_wake) {
 	// Set external interrupt configuration
 	config_extint_chan.gpio_pin = PIR_PORT;
 	config_extint_chan.gpio_pin_mux = PIR_EIC_PINMUX;
-	config_extint_chan.gpio_pin_pull = EXTINT_PULL_NONE;
+	config_extint_chan.gpio_pin_pull = EXTINT_PULL_DOWN;
 	config_extint_chan.detection_criteria = EXTINT_DETECT_RISING;
 	extint_chan_set_config(PIR_EIC_LINE, &config_extint_chan);
 
