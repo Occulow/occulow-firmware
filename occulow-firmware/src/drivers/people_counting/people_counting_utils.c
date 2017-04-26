@@ -123,6 +123,22 @@ uint16_t median_at_index(frame_t *frames, uint16_t num_frames, uint16_t index) {
 	}
 }
 
+uint16_t median(frame_t frame) {
+	uint16_t num_frames = GE_FRAME_SIZE;
+	frame_elem_t temp_frame[num_frames];
+	for (uint16_t i = 0; i < num_frames; i++) {
+		temp_frame[i] = frame[i];
+	}
+
+	quick_sort(temp_frame, 0, num_frames - 1);
+
+	if (num_frames % 2 == 0) {
+		return ((temp_frame[num_frames/2] + temp_frame[num_frames/2 - 1])/2);
+	} else {
+		return temp_frame[num_frames/2];
+	}
+}
+
 /**
  * @brief      Calculates the median frame
  *
