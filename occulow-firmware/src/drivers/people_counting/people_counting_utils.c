@@ -149,10 +149,15 @@ uint16_t median(frame_t frame) {
  * @return     Median frame
  */
 frame_t compute_median_frame(frame_t frame_out, frame_t *frames, uint16_t num_frames) {
+	uint16_t index;
 	// Find median for each element in the frame
-	for (int i = 0; i < GE_FRAME_SIZE; i++) {
-		frame_out[i] = median_at_index(frames, num_frames, i);
+	for (uint16_t col = 0; col < GRID_SIZE; col++) {
+		for (int16_t row = 0; row < GRID_SIZE; row++) {
+			index = GET_FRAME_INDEX(row, col);
+			frame_out[index] = median_at_index(frames, num_frames, index);
+		}
 	}
+	
 	return frame_out;
 }
 
