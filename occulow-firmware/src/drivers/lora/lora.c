@@ -67,6 +67,8 @@ static void init_power_pins() {
 
 	port_pin_set_config(LORA_POWER_PIN, &power_gpio_config);
 	// Enable power
+	port_pin_set_output_level(LORA_POWER_PIN, true);
+	delay_ms(500);
 	port_pin_set_output_level(LORA_POWER_PIN, false);
 }
 
@@ -186,6 +188,36 @@ void lora_join_otaa() {
 			break;
 		}
 	}
+}
+
+void lora_sleep(void) {
+	uint16_t cmd_length = sprintf((char *) tx_buffer, SLEEP_CMD, 2147483647);
+	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, cmd_length) != STATUS_OK);
+}
+void lora_wake(void) {
+	SercomUsart *const usart_hw = &(lora_usart_module.hw->USART);
+	uint16_t baud = 0;
+	uint32_t gclk_index = _sercom_get_sercom_inst_index(lora_usart_module.hw) + SERCOM0_GCLK_ID_CORE;
+	_sercom_get_async_baud_val(LORA_USART_BAUD/4,
+		system_gclk_chan_get_hz(gclk_index), &baud, SERCOM_ASYNC_OPERATION_MODE_ARITHMETIC, SERCOM_ASYNC_SAMPLE_NUM_16);
+	printf("low baud: %d\r\n", baud);
+	// Set baud to low rate
+	usart_hw->BAUD.reg = baud;
+	while(usart_write_wait(&lora_usart_module, 0x0) != STATUS_OK);
+
+	_sercom_get_async_baud_val(LORA_USART_BAUD,
+	system_gclk_chan_get_hz(gclk_index), &baud, SERCOM_ASYNC_OPERATION_MODE_ARITHMETIC, SERCOM_ASYNC_SAMPLE_NUM_16);
+	printf("reg baud: %d\r\n", baud);
+	// Set baud to original rate
+	usart_hw->BAUD.reg = baud;
+
+	rx_buffer[0] = 0x55;
+	rx_buffer[1] = '\r';
+	rx_buffer[2] = '\n';
+	// Trigger wakeup + autobaud detection
+	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, 3) != STATUS_OK);
+
+	printf("Lora wake\r\n");
 }
 
 /**

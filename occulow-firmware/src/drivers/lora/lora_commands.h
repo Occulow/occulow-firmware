@@ -24,5 +24,6 @@ static const char SET_CHANNEL_STATUS_CMD[] = "mac set ch status %d %s\r\n";
 static const char JOIN_OTAA_CMD[] = "mac join otaa\r\n";
 static const char JOIN_ABP_CMD[] = "mac join abp\r\n";
 static const char SEND_UNCONF_CMD[] = "mac tx uncnf 1 %s\r\n";
+static const char SLEEP_CMD[] = "sys sleep %d\r\n";
 
 #endif /* LORA_COMMANDS_H_ */
