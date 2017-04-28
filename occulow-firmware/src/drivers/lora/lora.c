@@ -143,6 +143,12 @@ void lora_join_otaa() {
 	lora_send_cmd(tx_buffer, cmd_length);
 	cmd_length = sprintf((char *) tx_buffer, SET_APPKEY_CMD, "2b7e151628aed2a6abf7156669cf4f3c");
 	lora_send_cmd(tx_buffer, cmd_length);
+	cmd_length = sprintf((char *) tx_buffer, SET_DEVADDR_CMD, "00000000");
+	lora_send_cmd(tx_buffer, cmd_length);
+	cmd_length = sprintf((char *) tx_buffer, SET_NWK_SKEY, "00000000000000000000000000000000");
+	lora_send_cmd(tx_buffer, cmd_length);
+	cmd_length = sprintf((char *) tx_buffer, SET_APP_SKEY, "00000000000000000000000000000000");
+	lora_send_cmd(tx_buffer, cmd_length);
 	cmd_length = sprintf((char *) tx_buffer, SAVE_CMD);
 	lora_send_cmd(tx_buffer, cmd_length);
 
@@ -161,6 +167,53 @@ void lora_join_otaa() {
 
 		// Loop until response from gateway is received
 		for(j = 0; j < MAX_STATUS_CHECKS; j++){
+			if (read_response()) {
+				printf("RX: %s\r\n", rx_buffer);
+				// Gateway responded
+				if(rx_buffer[0] == 'a'){	// TODO: Checking if 'accepted'.
+					accepted = true;
+					printf("Join Accepted!\r\n");
+					break;
+				} else if (j == MAX_STATUS_CHECKS - 1) {
+					printf("Join Failed... Aborting\r\n");
+					accepted = false;
+				} else {
+					// Join request sent and denied, so new command must be sent
+					printf("Join Failed... Retrying in 10 seconds\r\n");
+					accepted = false;
+					delay_ms(10000);
+					break;
+				}
+			} else {
+				//Wait 5 seconds before checking for the response again
+				printf("No response, waiting 5 seconds...\r\n");
+				delay_ms(5000);
+			}
+		}
+		if(accepted){
+			break;
+		}
+	}
+}
+
+void lora_join_abp(void) {
+	bool accepted = false;
+	uint16_t cmd_length = 0;
+	// Loop MAX_JOIN_ATTEMPTS to try and join the network
+	for(uint16_t i = 0; i < MAX_JOIN_ATTEMPTS; i++){
+		cmd_length = sprintf((char *) tx_buffer, JOIN_ABP_CMD);
+		lora_send_cmd(tx_buffer,cmd_length);
+
+		// TODO: Check with strcmp
+		if(rx_buffer[0] != 'o'){
+			// Command not received by RN2903. Needs to be sent again.
+			printf("Command Failed. Retrying in 10 s\r\n");
+			delay_ms(10000);
+			continue;
+		}
+
+		// Loop until response from gateway is received
+		for(uint16_t j = 0; j < MAX_STATUS_CHECKS; j++){
 			if (read_response()) {
 				printf("RX: %s\r\n", rx_buffer);
 				// Gateway responded
@@ -228,7 +281,7 @@ void lora_wake(void) {
 	init_usart();
 
 	// Send autobaud detection cmd
-	while(usart_write_buffer_wait(&lora_usart_module, AUTO_BAUD_CMD, 
+	while(usart_write_buffer_wait(&lora_usart_module, AUTO_BAUD_CMD,
 		sizeof(AUTO_BAUD_CMD)) != STATUS_OK);
 
 	// Receive "OK" from chip waking up
