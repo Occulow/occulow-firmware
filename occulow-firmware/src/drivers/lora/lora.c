@@ -190,12 +190,18 @@ void lora_join_otaa() {
 	}
 }
 
+/**
+ * @brief      Sleeps the lora module indefinitely
+ */
 void lora_sleep(void) {
 	// Sleep "indefinitely": 24.86 days (INT_MAX ms)
 	uint16_t cmd_length = sprintf((char *) tx_buffer, SLEEP_CMD, 2147483647);
 	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, cmd_length) != STATUS_OK);
 }
 
+/**
+ * @brief      Wakes up the lora module, assuming that it is asleep
+ */
 void lora_wake(void) {
 	struct usart_config lora_wake_config;
 
