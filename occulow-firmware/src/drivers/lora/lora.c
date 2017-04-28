@@ -191,33 +191,49 @@ void lora_join_otaa() {
 }
 
 void lora_sleep(void) {
+	// Sleep "indefinitely": 24.86 days (INT_MAX ms)
 	uint16_t cmd_length = sprintf((char *) tx_buffer, SLEEP_CMD, 2147483647);
 	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, cmd_length) != STATUS_OK);
 }
+
 void lora_wake(void) {
-	SercomUsart *const usart_hw = &(lora_usart_module.hw->USART);
-	uint16_t baud = 0;
-	uint32_t gclk_index = _sercom_get_sercom_inst_index(lora_usart_module.hw) + SERCOM0_GCLK_ID_CORE;
-	_sercom_get_async_baud_val(LORA_USART_BAUD/4,
-		system_gclk_chan_get_hz(gclk_index), &baud, SERCOM_ASYNC_OPERATION_MODE_ARITHMETIC, SERCOM_ASYNC_SAMPLE_NUM_16);
-	printf("low baud: %d\r\n", baud);
-	// Set baud to low rate
-	usart_hw->BAUD.reg = baud;
+	struct usart_config lora_wake_config;
+
+	// Configure baud rate to be 1/2 of the normal config (so sending 0x0 is a
+	// break condition)
+	usart_disable(&lora_usart_module);
+	usart_get_config_defaults(&lora_wake_config);
+	lora_wake_config.mux_setting = LORA_USART_MUX_SETTING;
+	lora_wake_config.pinmux_pad0 = LORA_SERCOM_PINMUX_PAD0;
+	lora_wake_config.pinmux_pad1 = LORA_SERCOM_PINMUX_PAD1;
+	lora_wake_config.pinmux_pad2 = LORA_SERCOM_PINMUX_PAD2;
+	lora_wake_config.pinmux_pad3 = LORA_SERCOM_PINMUX_PAD3;
+	// Anything less than LORA_USART_BAUD/2 will work
+	lora_wake_config.baudrate = LORA_USART_BAUD/2;
+	while (usart_init(&lora_usart_module, SERCOM1, &lora_wake_config) != STATUS_OK);
+
+	// Signal break condition ("UART_RX pin low for longer than the time to
+	// transmit a complete character")
+	usart_enable(&lora_usart_module);
 	while(usart_write_wait(&lora_usart_module, 0x0) != STATUS_OK);
 
-	_sercom_get_async_baud_val(LORA_USART_BAUD,
-	system_gclk_chan_get_hz(gclk_index), &baud, SERCOM_ASYNC_OPERATION_MODE_ARITHMETIC, SERCOM_ASYNC_SAMPLE_NUM_16);
-	printf("reg baud: %d\r\n", baud);
-	// Set baud to original rate
-	usart_hw->BAUD.reg = baud;
+	// Restore normal config (normal baud rate)
+	usart_disable(&lora_usart_module);
+	init_usart();
 
-	rx_buffer[0] = 0x55;
-	rx_buffer[1] = '\r';
-	rx_buffer[2] = '\n';
-	// Trigger wakeup + autobaud detection
-	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, 3) != STATUS_OK);
+	// Send autobaud detection cmd
+	while(usart_write_buffer_wait(&lora_usart_module, AUTO_BAUD_CMD, 
+		sizeof(AUTO_BAUD_CMD)) != STATUS_OK);
 
-	printf("Lora wake\r\n");
+	// Receive "OK" from chip waking up
+	if (read_response()) {
+		printf("Wake: %s\r\n", rx_buffer);
+	}
+
+	// HACK: Not sure why the chip also send "in" after "ok" on wake
+	if (read_response()) {
+		printf("Wake: %s\r\n", rx_buffer);
+	}
 }
 
 /**
