@@ -247,6 +247,7 @@ void lora_join_abp(void) {
 void lora_sleep(void) {
 	// Sleep "indefinitely": 24.86 days (INT_MAX ms)
 	uint16_t cmd_length = sprintf((char *) tx_buffer, SLEEP_CMD, 2147483647);
+	printf("TX: %s\r\n", tx_buffer);
 	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, cmd_length) != STATUS_OK);
 }
 
