@@ -24,8 +24,9 @@
 #define MAX_READ_ATTEMPTS 100
 #define LORA_RX_BUFFER_SIZE 100
 #define LORA_TX_BUFFER_SIZE 100
+#define LORA_REJOIN_DELAY 10000
 
-typedef enum {OK, ACCEPTED, DENIED, ERROR} lora_status_t;
+typedef enum {OK, ACCEPTED, DENIED, UNKNOWN} lora_status_t;
 typedef uint8_t *lora_cmd_t;
 
 void lora_init(void);

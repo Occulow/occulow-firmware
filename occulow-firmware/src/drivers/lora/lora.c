@@ -5,6 +5,7 @@
  *  Author: mazacar8
  */
 
+#include <string.h>
 #include <drivers/lora/lora.h>
 #include <drivers/lora/lora_commands.h>
 
@@ -133,7 +134,6 @@ void setup_channels() {
  * @brief      Attempts to join the Lora network a maximum of 5 times
  */
 void lora_join_otaa() {
-	int i,j;
 	uint16_t cmd_length;
 	bool accepted = false;
 
@@ -153,24 +153,23 @@ void lora_join_otaa() {
 	lora_send_cmd(tx_buffer, cmd_length);
 
 	// Loop MAX_JOIN_ATTEMPTS to try and join the network
-	for(i = 0; i < MAX_JOIN_ATTEMPTS; i++){
+	for(uint16_t i = 0; i < MAX_JOIN_ATTEMPTS; i++){
 		cmd_length = sprintf((char *) tx_buffer, JOIN_OTAA_CMD);
 		lora_send_cmd(tx_buffer,cmd_length);
 
-		// TODO: Check with strcmp
-		if(rx_buffer[0] != 'o'){
+		if(strncmp(rx_buffer, LORA_OK, sizeof(LORA_OK) - 1) != 0){
 			// Command not received by RN2903. Needs to be sent again.
-			printf("Command Failed. Retrying in 10 s\r\n");
-			delay_ms(10000);
+			printf("Command Failed. Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
+			delay_ms(LORA_REJOIN_DELAY);
 			continue;
 		}
 
 		// Loop until response from gateway is received
-		for(j = 0; j < MAX_STATUS_CHECKS; j++){
+		for(uint16_t j = 0; j < MAX_STATUS_CHECKS; j++){
 			if (read_response()) {
 				printf("RX: %s\r\n", rx_buffer);
 				// Gateway responded
-				if(rx_buffer[0] == 'a'){	// TODO: Checking if 'accepted'.
+				if(strncmp(rx_buffer, LORA_ACCEPTED, sizeof(LORA_ACCEPTED) - 1) == 0){
 					accepted = true;
 					printf("Join Accepted!\r\n");
 					break;
@@ -179,9 +178,9 @@ void lora_join_otaa() {
 					accepted = false;
 				} else {
 					// Join request sent and denied, so new command must be sent
-					printf("Join Failed... Retrying in 10 seconds\r\n");
+					printf("Join Failed... Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
 					accepted = false;
-					delay_ms(10000);
+					delay_ms(LORA_REJOIN_DELAY);
 					break;
 				}
 			} else {
@@ -204,11 +203,10 @@ void lora_join_abp(void) {
 		cmd_length = sprintf((char *) tx_buffer, JOIN_ABP_CMD);
 		lora_send_cmd(tx_buffer,cmd_length);
 
-		// TODO: Check with strcmp
-		if(rx_buffer[0] != 'o'){
+		if(strncmp(rx_buffer, LORA_OK, sizeof(LORA_OK) - 1) != 0){
 			// Command not received by RN2903. Needs to be sent again.
-			printf("Command Failed. Retrying in 10 s\r\n");
-			delay_ms(10000);
+			printf("Command Failed. Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
+			delay_ms(LORA_REJOIN_DELAY);
 			continue;
 		}
 
@@ -217,7 +215,7 @@ void lora_join_abp(void) {
 			if (read_response()) {
 				printf("RX: %s\r\n", rx_buffer);
 				// Gateway responded
-				if(rx_buffer[0] == 'a'){	// TODO: Checking if 'accepted'.
+				if(strncmp(rx_buffer, LORA_ACCEPTED, sizeof(LORA_ACCEPTED) - 1) == 0){
 					accepted = true;
 					printf("Join Accepted!\r\n");
 					break;
@@ -226,7 +224,7 @@ void lora_join_abp(void) {
 					accepted = false;
 				} else {
 					// Join request sent and denied, so new command must be sent
-					printf("Join Failed... Retrying in 10 seconds\r\n");
+					printf("Join Failed... Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
 					accepted = false;
 					delay_ms(10000);
 					break;
@@ -324,7 +322,7 @@ static bool read_response() {
 	enum status_code err;
 
 	// Block and read 2 characters always (all responses are at minimum 2 characters)
-	while ((err = usart_read_buffer_wait(&lora_usart_module, (uint8_t *) &rx_buffer, 2)) != STATUS_OK) {
+	while ((err = usart_read_buffer_wait(&lora_usart_module, (uint8_t *) rx_buffer, 2)) != STATUS_OK) {
 		// printf("Fake error reading buffer: %x\r\n", err);
 		if (++err_count > MAX_READ_ATTEMPTS) {
 			printf("Error reading buffer: reached maximum read attempts.\r\n");
