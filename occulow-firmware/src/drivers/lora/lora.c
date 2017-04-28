@@ -67,6 +67,8 @@ static void init_power_pins() {
 
 	port_pin_set_config(LORA_POWER_PIN, &power_gpio_config);
 	// Enable power
+	port_pin_set_output_level(LORA_POWER_PIN, true);
+	delay_ms(500);
 	port_pin_set_output_level(LORA_POWER_PIN, false);
 }
 
@@ -185,6 +187,58 @@ void lora_join_otaa() {
 		if(accepted){
 			break;
 		}
+	}
+}
+
+/**
+ * @brief      Sleeps the lora module indefinitely
+ */
+void lora_sleep(void) {
+	// Sleep "indefinitely": 24.86 days (INT_MAX ms)
+	uint16_t cmd_length = sprintf((char *) tx_buffer, SLEEP_CMD, 2147483647);
+	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, cmd_length) != STATUS_OK);
+}
+
+/**
+ * @brief      Wakes up the lora module, assuming that it is asleep
+ */
+void lora_wake(void) {
+	struct usart_config lora_wake_config;
+
+	// Configure baud rate to be 1/2 of the normal config (so sending 0x0 is a
+	// break condition)
+	usart_disable(&lora_usart_module);
+	usart_get_config_defaults(&lora_wake_config);
+	lora_wake_config.mux_setting = LORA_USART_MUX_SETTING;
+	lora_wake_config.pinmux_pad0 = LORA_SERCOM_PINMUX_PAD0;
+	lora_wake_config.pinmux_pad1 = LORA_SERCOM_PINMUX_PAD1;
+	lora_wake_config.pinmux_pad2 = LORA_SERCOM_PINMUX_PAD2;
+	lora_wake_config.pinmux_pad3 = LORA_SERCOM_PINMUX_PAD3;
+	// Anything less than LORA_USART_BAUD/2 will work
+	lora_wake_config.baudrate = LORA_USART_BAUD/2;
+	while (usart_init(&lora_usart_module, SERCOM1, &lora_wake_config) != STATUS_OK);
+
+	// Signal break condition ("UART_RX pin low for longer than the time to
+	// transmit a complete character")
+	usart_enable(&lora_usart_module);
+	while(usart_write_wait(&lora_usart_module, 0x0) != STATUS_OK);
+
+	// Restore normal config (normal baud rate)
+	usart_disable(&lora_usart_module);
+	init_usart();
+
+	// Send autobaud detection cmd
+	while(usart_write_buffer_wait(&lora_usart_module, AUTO_BAUD_CMD, 
+		sizeof(AUTO_BAUD_CMD)) != STATUS_OK);
+
+	// Receive "OK" from chip waking up
+	if (read_response()) {
+		printf("Wake: %s\r\n", rx_buffer);
+	}
+
+	// HACK: Not sure why the chip also send "in" after "ok" on wake
+	if (read_response()) {
+		printf("Wake: %s\r\n", rx_buffer);
 	}
 }
 

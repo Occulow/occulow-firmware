@@ -10,6 +10,7 @@
 #define LORA_COMMANDS_H_
 
 static const char FACTORY_RESET_CMD[] = "sys factoryRESET\r\n";
+static const char GET_VER[] = "sys get ver\r\n";
 static const char SET_APPEUI_CMD[] = "mac set appeui %s\r\n";
 static const char SET_DEVEUI_CMD[] = "mac set deveui %s\r\n";
 static const char SET_APPKEY_CMD[] = "mac set appkey %s\r\n";
@@ -24,5 +25,7 @@ static const char SET_CHANNEL_STATUS_CMD[] = "mac set ch status %d %s\r\n";
 static const char JOIN_OTAA_CMD[] = "mac join otaa\r\n";
 static const char JOIN_ABP_CMD[] = "mac join abp\r\n";
 static const char SEND_UNCONF_CMD[] = "mac tx uncnf 1 %s\r\n";
+static const char SLEEP_CMD[] = "sys sleep %d\r\n";
+static const char AUTO_BAUD_CMD[] = {0x55, '\r', '\n'}
 
 #endif /* LORA_COMMANDS_H_ */
