@@ -3,7 +3,7 @@
  *
  * Created: 4/8/2017 9:24:47 PM
  *  Author: tsun
- */ 
+ */
 
 
 #ifndef STDIO_USART_H_

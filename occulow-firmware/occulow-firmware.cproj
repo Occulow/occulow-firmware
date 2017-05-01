@@ -616,6 +616,7 @@
     <Folder Include="src\drivers" />
     <Folder Include="src\drivers\grideye" />
     <Folder Include="src\drivers\lora" />
+    <Folder Include="src\drivers\led" />
     <Folder Include="src\drivers\people_counting" />
     <Folder Include="src\drivers\stdio_usart" />
     <Folder Include="src\drivers\pir" />
@@ -1128,6 +1129,12 @@
     <Compile Include="src\drivers\grideye\grideye.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\drivers\led\led.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\led\led.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\drivers\lora\lora.c">
       <SubType>compile</SubType>
     </Compile>
@@ -1156,6 +1163,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\drivers\pir\pir.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\stdio_usart\logging.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\drivers\stdio_usart\stdio_usart.c">

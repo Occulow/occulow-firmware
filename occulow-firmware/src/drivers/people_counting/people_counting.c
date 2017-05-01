@@ -9,6 +9,7 @@
 #include <drivers/grideye/grideye.h>
 #include <drivers/people_counting/people_counting_utils.h>
 #include <drivers/people_counting/people_counting_internal.h>
+#include <drivers/stdio_usart/logging.h>
 
 // Allocate areas to store raw and median frames
 static frame_elem_t MEDIAN_FRAME_CHUNK[MEDIAN_FRAME_CHUNK_SIZE];
@@ -75,7 +76,7 @@ void pc_new_frame(frame_t new_frame) {
 		buffer[size-1] = '\r';  // Replace last comma with \r
 		buffer[size] = '\n';
 		buffer[size+1] = '\0';
-		printf("F%d:%s", ++frame_count, buffer);
+		LOG("F%d:%s", ++frame_count, buffer);
 	}
 
 	// Reset counted
@@ -158,11 +159,11 @@ static void initialize_frame_stacks(void) {
 static direction_t determine_direction(uint16_t frame_index,
 	int16_t trigger_col, int16_t offset) {
 	if (TRIGGER_INDEX >= NUM_MEDIAN_FRAMES - 1 || TRIGGER_INDEX < 1){
-		printf("Macro TRIGGER_INDEX is invalid: Must be between 0 and NUM_MEDIAN_FRAMES");
+		LOG_LINE("Macro TRIGGER_INDEX is invalid: Must be between 0 and NUM_MEDIAN_FRAMES");
 		return DIR_NONE;
 	}
 	if (trigger_col + offset < 0 || trigger_col + offset >= GRID_SIZE) {
-		printf("Trigger offset/column out of bounds: (%d, %d)", trigger_col, offset);
+		LOG_LINE("Trigger offset/column out of bounds: (%d, %d)", trigger_col, offset);
 		return DIR_NONE;
 	}
 	uint16_t check_col = (uint16_t) (trigger_col + offset);
