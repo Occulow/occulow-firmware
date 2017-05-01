@@ -29,6 +29,8 @@ static const char JOIN_ABP_CMD[] = "mac join abp\r\n";
 static const char SEND_UNCONF_CMD[] = "mac tx uncnf 1 %s\r\n";
 static const char SLEEP_CMD[] = "sys sleep %d\r\n";
 static const char AUTO_BAUD_CMD[] = {0x55, '\r', '\n'};
+static const char MAC_PAUSE[] = "mac pause";
+static const char MAC_RESUME[] = "mac resume";
 
 static const char LORA_OK[] = "ok";
 static const char LORA_ACCEPTED[] = "accepted";

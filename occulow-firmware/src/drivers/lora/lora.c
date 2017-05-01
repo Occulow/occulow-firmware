@@ -8,6 +8,7 @@
 #include <string.h>
 #include <drivers/lora/lora.h>
 #include <drivers/lora/lora_commands.h>
+#include <drivers/stdio_usart/logging.h>
 
 static struct usart_module lora_usart_module;
 static uint8_t rx_buffer[LORA_RX_BUFFER_SIZE];
@@ -159,7 +160,7 @@ void lora_join_otaa() {
 
 		if(strncmp(rx_buffer, LORA_OK, sizeof(LORA_OK) - 1) != 0){
 			// Command not received by RN2903. Needs to be sent again.
-			printf("Command Failed. Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
+			LOG_LINE("Command Failed. Retrying in %d millis", LORA_REJOIN_DELAY);
 			delay_ms(LORA_REJOIN_DELAY);
 			continue;
 		}
@@ -167,25 +168,27 @@ void lora_join_otaa() {
 		// Loop until response from gateway is received
 		for(uint16_t j = 0; j < MAX_STATUS_CHECKS; j++){
 			if (read_response()) {
-				printf("RX: %s\r\n", rx_buffer);
+				LOG_LINE("RX: %s", rx_buffer);
 				// Gateway responded
 				if(strncmp(rx_buffer, LORA_ACCEPTED, sizeof(LORA_ACCEPTED) - 1) == 0){
 					accepted = true;
-					printf("Join Accepted!\r\n");
+					LOG_LINE("Join Accepted!");
+					cmd_length = sprintf((char *) tx_buffer, SAVE_CMD);
+					lora_send_cmd(tx_buffer, cmd_length);
 					break;
 				} else if (j == MAX_STATUS_CHECKS - 1) {
-					printf("Join Failed... Aborting\r\n");
+					LOG_LINE("Join Failed... Aborting");
 					accepted = false;
 				} else {
 					// Join request sent and denied, so new command must be sent
-					printf("Join Failed... Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
+					LOG_LINE("Join Failed... Retrying in %d millis", LORA_REJOIN_DELAY);
 					accepted = false;
 					delay_ms(LORA_REJOIN_DELAY);
 					break;
 				}
 			} else {
 				//Wait 5 seconds before checking for the response again
-				printf("No response, waiting 5 seconds...\r\n");
+				LOG_LINE("No response, waiting 5 seconds...");
 				delay_ms(5000);
 			}
 		}
@@ -205,7 +208,7 @@ void lora_join_abp(void) {
 
 		if(strncmp(rx_buffer, LORA_OK, sizeof(LORA_OK) - 1) != 0){
 			// Command not received by RN2903. Needs to be sent again.
-			printf("Command Failed. Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
+			LOG_LINE("Command Failed. Retrying in %d millis", LORA_REJOIN_DELAY);
 			delay_ms(LORA_REJOIN_DELAY);
 			continue;
 		}
@@ -213,25 +216,27 @@ void lora_join_abp(void) {
 		// Loop until response from gateway is received
 		for(uint16_t j = 0; j < MAX_STATUS_CHECKS; j++){
 			if (read_response()) {
-				printf("RX: %s\r\n", rx_buffer);
+				LOG_LINE("RX: %s", rx_buffer);
 				// Gateway responded
 				if(strncmp(rx_buffer, LORA_ACCEPTED, sizeof(LORA_ACCEPTED) - 1) == 0){
 					accepted = true;
-					printf("Join Accepted!\r\n");
+					LOG_LINE("Join Accepted!");
+					cmd_length = sprintf((char *) tx_buffer, SAVE_CMD);
+					lora_send_cmd(tx_buffer, cmd_length);
 					break;
 				} else if (j == MAX_STATUS_CHECKS - 1) {
-					printf("Join Failed... Aborting\r\n");
+					LOG_LINE("Join Failed... Aborting.");
 					accepted = false;
 				} else {
 					// Join request sent and denied, so new command must be sent
-					printf("Join Failed... Retrying in %d millis\r\n", LORA_REJOIN_DELAY);
+					LOG_LINE("Join Failed... Retrying in %d millis", LORA_REJOIN_DELAY);
 					accepted = false;
-					delay_ms(10000);
+					delay_ms(LORA_REJOIN_DELAY);
 					break;
 				}
 			} else {
 				//Wait 5 seconds before checking for the response again
-				printf("No response, waiting 5 seconds...\r\n");
+				LOG_LINE("No response, waiting 5 seconds...");
 				delay_ms(5000);
 			}
 		}
@@ -247,7 +252,7 @@ void lora_join_abp(void) {
 void lora_sleep(void) {
 	// Sleep "indefinitely": 24.86 days (INT_MAX ms)
 	uint16_t cmd_length = sprintf((char *) tx_buffer, SLEEP_CMD, 2147483647);
-	printf("TX: %s\r\n", tx_buffer);
+	LOG_LINE("TX: %s", tx_buffer);
 	while(usart_write_buffer_wait(&lora_usart_module, tx_buffer, cmd_length) != STATUS_OK);
 }
 
@@ -285,12 +290,12 @@ void lora_wake(void) {
 
 	// Receive "OK" from chip waking up
 	if (read_response()) {
-		printf("Wake: %s\r\n", rx_buffer);
+		LOG_LINE("Wake: %s", rx_buffer);
 	}
 
 	// HACK: Not sure why the chip also send "in" after "ok" on wake
 	if (read_response()) {
-		printf("Wake: %s\r\n", rx_buffer);
+		LOG_LINE("Wake: %s", rx_buffer);
 	}
 }
 
@@ -301,10 +306,10 @@ void lora_wake(void) {
  * @param	   len	Length of command to send
  */
 lora_status_t lora_send_cmd(lora_cmd_t cmd, uint16_t len) {
-	printf("TX: %s", cmd);
+	LOG_LINE("TX: %s", cmd);
 	while(usart_write_buffer_wait(&lora_usart_module, cmd, len) != STATUS_OK);
 	if (read_response()) {
-		printf("RX: %s\r\n", rx_buffer);
+		LOG_LINE("RX: %s", rx_buffer);
 		return OK;
 	}
 	// TODO: Return something better than OK
@@ -324,9 +329,9 @@ static bool read_response() {
 
 	// Block and read 2 characters always (all responses are at minimum 2 characters)
 	while ((err = usart_read_buffer_wait(&lora_usart_module, (uint8_t *) rx_buffer, 2)) != STATUS_OK) {
-		// printf("Fake error reading buffer: %x\r\n", err);
+		// LOG_LINE("Fake error reading buffer: %x", err);
 		if (++err_count > MAX_READ_ATTEMPTS) {
-			printf("Error reading buffer: reached maximum read attempts.\r\n");
+			LOG_LINE("Error reading buffer: reached maximum read attempts.");
 			return false;
 		}
 	}
@@ -343,7 +348,7 @@ static bool read_response() {
 			if (lora_usart_module.hw->USART.INTFLAG.reg & SERCOM_USART_INTFLAG_RXC) {
 				break;
 			} else if (i == USART_TIMEOUT) {
-				printf("Timed out\r\n");
+				LOG_LINE("Timed out");
 				timed_out = true;
 				break;
 			}
@@ -352,9 +357,9 @@ static bool read_response() {
 			continue;
 		}
 		while((err = usart_read_wait(&lora_usart_module, &new_char)) != STATUS_OK) {
-			printf("Error reading buffer: %x\r\n", err);
+			LOG_LINE("Error reading buffer: %x", err);
 			if (++err_count > MAX_READ_ATTEMPTS) {
-				printf("Error reading buffer: reached maximum read attempts.\r\n");
+				LOG_LINE("Error reading buffer: reached maximum read attempts.");
 				return false;
 			}
 		}
@@ -387,6 +392,9 @@ void lora_send_count(uint16_t ingress, uint16_t egress){
 	sprintf((char *) counts, "%02X%02X", ingress, egress);
 	uint16_t cmd_length = sprintf((char *) tx_buffer, SEND_UNCONF_CMD, counts);
 	lora_send_cmd(tx_buffer, cmd_length);
+	if (read_response()) {
+		LOG_LINE("RX2: %s", rx_buffer);
+	}
 }
 
 /**

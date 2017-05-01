@@ -5,10 +5,13 @@
 
 #include <asf.h>
 #include <drivers/stdio_usart/stdio_usart.h>
+#include <drivers/led/led.h>
 #include <drivers/pir/pir.h>
 #include <drivers/lora/lora.h>
+#include <drivers/lora/lora_commands.h>
 #include <drivers/grideye/grideye.h>
 #include <drivers/people_counting/people_counting.h>
+#include <drivers/stdio_usart/logging.h>
 
 static uint32_t inactivity_counter = 0;
 
@@ -21,7 +24,7 @@ static void sleep_device(void);
  */
 void pir_on_wake(void) {
 	// TODO: Implement what happens when the PIR sends an interrupt
-	printf("Wake!\r\n");
+	LOG_LINE("PIR Wake!");
 }
 
 static void init_standby(void) {
@@ -31,7 +34,7 @@ static void init_standby(void) {
 }
 
 static void sleep_device(void) {
-	printf("Sleeping\r\n");
+	LOG_LINE("MCU Sleeping");
 	system_set_sleepmode(SYSTEM_SLEEPMODE_STANDBY);
 	system_sleep();
 }
@@ -42,11 +45,12 @@ int main (void)
 	system_init();
 	delay_init();
 	init_standby();
+	led_init();
 	stdio_init();
 	lora_init();
-	grideye_init();
-	pc_init();
-	pir_init(pir_on_wake);
+	//grideye_init();
+	//pc_init();
+	//pir_init(pir_on_wake);
 
 	lora_join_otaa();
 	lora_sleep();
@@ -57,13 +61,31 @@ int main (void)
 	double period_out_count = 0;
 
 	while(1) {
-		if (inactivity_counter == 50) {
+		delay_ms(5000);
+
+		led_set_state(true);
+		lora_wake();
+		//lora_send_cmd(MAC_RESUME, sizeof(MAC_RESUME));
+		lora_join_abp();
+		lora_send_count(1,1);
+		lora_sleep();
+		led_set_state(false);
+
+		//ge_set_mode(GE_MODE_SLEEP);
+		//pir_enable_interrupt();
+		//sleep_device();
+		//pir_disable_interrupt();
+		//ge_set_mode(GE_MODE_NORMAL);
+		/*if (inactivity_counter == 50) {
 			// Each grideye cycle is ~100ms (since it claims 10FPS), so each tick of the
 			//  inactivity counter is assumed to be 100ms.
 			inactivity_counter = 0;
+			led_set_state(true);
 			lora_wake();
+			lora_join_abp();
 			lora_send_count(period_in_count, period_out_count);
 			lora_sleep();
+			led_set_state(false);
 			period_in_count = 0;
 			period_out_count = 0;
 			ge_set_mode(GE_MODE_SLEEP);
@@ -73,7 +95,7 @@ int main (void)
 			pir_disable_interrupt();
 			//port_pin_set_output_level(GE_PWR_PIN, false);
 			ge_set_mode(GE_MODE_NORMAL);
-			pc_flush_buffer();
+			// pc_flush_buffer();
 		}
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);
@@ -83,13 +105,13 @@ int main (void)
 
 			if (in_count > 0.0 || out_count > 0.0) {
 				if (((double) ((int) in_count)) < in_count && ((double) ((int) out_count)) < out_count) {
-					printf("D(%d.5,%d.5)\r\n", (int) in_count, (int) out_count);
+					LOG_LINE("D(%d.5,%d.5)", (int) in_count, (int) out_count);
 				} else if (((double) ((int) in_count)) < in_count) {
-					printf("D(%d.5,%d)\r\n", (int) in_count, (int) out_count);
+					LOG_LINE("D(%d.5,%d)", (int) in_count, (int) out_count);
 				} else if (((double) ((int) out_count)) < out_count) {
-					printf("D(%d,%d.5)\r\n", (int) in_count, (int) out_count);
+					LOG_LINE("D(%d,%d.5)", (int) in_count, (int) out_count);
 				} else {
-					printf("D(%d,%d)\r\n", (int) in_count, (int) out_count);
+					LOG_LINE("D(%d,%d)", (int) in_count, (int) out_count);
 				}
 				period_in_count += in_count;
 				period_out_count += out_count;
@@ -100,6 +122,6 @@ int main (void)
 				// Increase inactivity counter
 				inactivity_counter++;
 			}
-		}
+		}*/
 	}
 }
