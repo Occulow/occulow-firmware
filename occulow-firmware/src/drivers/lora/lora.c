@@ -332,7 +332,6 @@ static bool read_response() {
 	while ((err = usart_read_buffer_wait(&lora_usart_module, (uint8_t *) rx_buffer, 2)) != STATUS_OK) {
 		// LOG_LINE("Fake error reading buffer: %x", err);
 		if (++err_count > MAX_READ_ATTEMPTS) {
-			LOG_LINE("Fake error reading buffer: %x", err);
 			LOG_LINE("Error reading buffer (0): reached maximum read attempts.");
 			return false;
 		}
