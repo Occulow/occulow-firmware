@@ -354,6 +354,10 @@ static bool read_response() {
 			}
 		}
 		if (timed_out) {
+			if (++err_count > MAX_READ_ATTEMPTS) {
+				LOG_LINE("Error reading buffer: reached maximum read attempts.");
+				return false;
+			}
 			continue;
 		}
 		while((err = usart_read_wait(&lora_usart_module, &new_char)) != STATUS_OK) {
