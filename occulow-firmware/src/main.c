@@ -26,6 +26,7 @@ static void sleep_device(void);
 void pir_on_wake(void) {
 	// TODO: Implement what happens when the PIR sends an interrupt
 	LOG_LINE("PIR Wake!");
+	inactivity_counter = 0;
 }
 
 static void init_standby(void) {
@@ -71,11 +72,11 @@ int main (void)
 		if (inactivity_counter == 50) {
 			// Each grideye cycle is ~100ms (since it claims 10FPS), so each tick of the
 			//  inactivity counter is assumed to be 100ms.
+			pir_disable_interrupt();
 			inactivity_counter = 0;
 			led_set_state(true);
 			lora_wake();
 			lora_join_abp();
-
 			period_in_count = ceil(period_in_count);
 			period_out_count = ceil(period_out_count);
 			lora_send_count(period_in_count, period_out_count);
@@ -84,13 +85,13 @@ int main (void)
 			period_in_count = 0;
 			period_out_count = 0;
 			ge_set_mode(GE_MODE_SLEEP);
-			//port_pin_set_output_level(GE_PWR_PIN, true);
 			pir_enable_interrupt();
+
 			sleep_device();
+
 			pir_disable_interrupt();
-			//port_pin_set_output_level(GE_PWR_PIN, false);
 			ge_set_mode(GE_MODE_NORMAL);
-			// pc_flush_buffer();
+			pir_enable_interrupt();
 		}
 		if (!ge_is_sleeping()) {
 			ge_get_frame(grideye_frame);
