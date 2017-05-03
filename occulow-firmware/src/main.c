@@ -4,6 +4,7 @@
  */
 
 #include <asf.h>
+#include <math.h>
 #include <drivers/stdio_usart/stdio_usart.h>
 #include <drivers/led/led.h>
 #include <drivers/pir/pir.h>
@@ -74,12 +75,9 @@ int main (void)
 			led_set_state(true);
 			//lora_wake();
 			//lora_join_abp();
-			if (period_in_count > 0.0 && period_in_count < 1.0) {
-				period_in_count = 1.0;
-			}
-			if (period_out_count > 0.0 && period_out_count < 1.0) {
-				period_out_count = 1.0;
-			}
+
+			period_in_count = ceil(period_in_count);
+			period_out_count = ceil(period_out_count);
 			lora_send_count(period_in_count, period_out_count);
 			//lora_sleep();
 			led_set_state(false);
@@ -101,17 +99,17 @@ int main (void)
 			out_count = pc_get_out_count();
 
 			if (in_count > 0.0 || out_count > 0.0) {
-				if (((double) ((int) in_count)) < in_count && ((double) ((int) out_count)) < out_count) {
-					LOG_LINE("D(%d.5,%d.5)", (int) in_count, (int) out_count);
-				} else if (((double) ((int) in_count)) < in_count) {
-					LOG_LINE("D(%d.5,%d)", (int) in_count, (int) out_count);
-				} else if (((double) ((int) out_count)) < out_count) {
-					LOG_LINE("D(%d,%d.5)", (int) in_count, (int) out_count);
-				} else {
-					LOG_LINE("D(%d,%d)", (int) in_count, (int) out_count);
-				}
 				period_in_count += in_count;
 				period_out_count += out_count;
+				if (((double) ((int) period_in_count)) < period_in_count && ((double) ((int) period_out_count)) < period_out_count) {
+					LOG_LINE("D(%d.5,%d.5)", (int) period_in_count, (int) period_out_count);
+					} else if (((double) ((int) period_in_count)) < period_in_count) {
+					LOG_LINE("D(%d.5,%d)", (int) period_in_count, (int) period_out_count);
+					} else if (((double) ((int) period_out_count)) < period_out_count) {
+					LOG_LINE("D(%d,%d.5)", (int) period_in_count, (int) period_out_count);
+					} else {
+					LOG_LINE("D(%d,%d)", (int) period_in_count, (int) period_out_count);
+				}
 
 				// Reset inactivity counter
 				inactivity_counter = 0;
