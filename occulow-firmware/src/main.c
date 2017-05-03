@@ -48,12 +48,18 @@ int main (void)
 	led_init();
 	stdio_init();
 	lora_init();
-	//grideye_init();
-	//pc_init();
-	//pir_init(pir_on_wake);
+	grideye_init();
+	pc_init();
+	pir_init(pir_on_wake);
 
+	led_set_state(true);
+	delay_ms(500);
+	led_set_state(false);
+	delay_ms(500);
+	led_set_state(true);
 	lora_join_otaa();
-	lora_sleep();
+	led_set_state(false);
+	// lora_sleep();
 
 	double in_count = 0;
 	double out_count = 0;
@@ -61,30 +67,21 @@ int main (void)
 	double period_out_count = 0;
 
 	while(1) {
-		delay_ms(5000);
-
-		led_set_state(true);
-		lora_wake();
-		//lora_send_cmd(MAC_RESUME, sizeof(MAC_RESUME));
-		lora_join_abp();
-		lora_send_count(1,1);
-		lora_sleep();
-		led_set_state(false);
-
-		//ge_set_mode(GE_MODE_SLEEP);
-		//pir_enable_interrupt();
-		//sleep_device();
-		//pir_disable_interrupt();
-		//ge_set_mode(GE_MODE_NORMAL);
-		/*if (inactivity_counter == 50) {
+		if (inactivity_counter == 50) {
 			// Each grideye cycle is ~100ms (since it claims 10FPS), so each tick of the
 			//  inactivity counter is assumed to be 100ms.
 			inactivity_counter = 0;
 			led_set_state(true);
-			lora_wake();
-			lora_join_abp();
+			//lora_wake();
+			//lora_join_abp();
+			if (period_in_count > 0.0 && period_in_count < 1.0) {
+				period_in_count = 1.0;
+			}
+			if (period_out_count > 0.0 && period_out_count < 1.0) {
+				period_out_count = 1.0;
+			}
 			lora_send_count(period_in_count, period_out_count);
-			lora_sleep();
+			//lora_sleep();
 			led_set_state(false);
 			period_in_count = 0;
 			period_out_count = 0;
@@ -122,6 +119,6 @@ int main (void)
 				// Increase inactivity counter
 				inactivity_counter++;
 			}
-		}*/
+		}
 	}
 }
