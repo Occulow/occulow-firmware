@@ -85,6 +85,7 @@ static void init_usart(void) {
 	lora_usart_config.pinmux_pad1 = LORA_SERCOM_PINMUX_PAD1;
 	lora_usart_config.pinmux_pad2 = LORA_SERCOM_PINMUX_PAD2;
 	lora_usart_config.pinmux_pad3 = LORA_SERCOM_PINMUX_PAD3;
+	lora_usart_config.run_in_standby = true;
 	lora_usart_config.baudrate = LORA_USART_BAUD;
 
 
@@ -331,7 +332,8 @@ static bool read_response() {
 	while ((err = usart_read_buffer_wait(&lora_usart_module, (uint8_t *) rx_buffer, 2)) != STATUS_OK) {
 		// LOG_LINE("Fake error reading buffer: %x", err);
 		if (++err_count > MAX_READ_ATTEMPTS) {
-			LOG_LINE("Error reading buffer: reached maximum read attempts.");
+			LOG_LINE("Fake error reading buffer: %x", err);
+			LOG_LINE("Error reading buffer (0): reached maximum read attempts.");
 			return false;
 		}
 	}
@@ -355,7 +357,7 @@ static bool read_response() {
 		}
 		if (timed_out) {
 			if (++err_count > MAX_READ_ATTEMPTS) {
-				LOG_LINE("Error reading buffer: reached maximum read attempts.");
+				LOG_LINE("Error reading buffer (1): reached maximum read attempts.");
 				return false;
 			}
 			continue;
@@ -363,7 +365,7 @@ static bool read_response() {
 		while((err = usart_read_wait(&lora_usart_module, &new_char)) != STATUS_OK) {
 			LOG_LINE("Error reading buffer: %x", err);
 			if (++err_count > MAX_READ_ATTEMPTS) {
-				LOG_LINE("Error reading buffer: reached maximum read attempts.");
+				LOG_LINE("Error reading buffer (2): reached maximum read attempts.");
 				return false;
 			}
 		}

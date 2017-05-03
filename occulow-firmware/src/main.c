@@ -60,7 +60,7 @@ int main (void)
 	led_set_state(true);
 	lora_join_otaa();
 	led_set_state(false);
-	// lora_sleep();
+	lora_sleep();
 
 	double in_count = 0;
 	double out_count = 0;
@@ -73,13 +73,13 @@ int main (void)
 			//  inactivity counter is assumed to be 100ms.
 			inactivity_counter = 0;
 			led_set_state(true);
-			//lora_wake();
-			//lora_join_abp();
+			lora_wake();
+			lora_join_abp();
 
 			period_in_count = ceil(period_in_count);
 			period_out_count = ceil(period_out_count);
 			lora_send_count(period_in_count, period_out_count);
-			//lora_sleep();
+			lora_sleep();
 			led_set_state(false);
 			period_in_count = 0;
 			period_out_count = 0;
