@@ -215,7 +215,7 @@ void lora_sleep(void) {
 /**
  * @brief      Wakes up the lora module, assuming that it is asleep
  */
-void lora_wake(void) {
+bool lora_wake(void) {
 	struct usart_config lora_wake_config;
 
 	// Configure baud rate to be 1/2 of the normal config (so sending 0x0 is a
@@ -247,12 +247,17 @@ void lora_wake(void) {
 	// Receive "OK" from chip waking up
 	if (read_response()) {
 		LOG_LINE("Wake: %s", rx_buffer);
+	} else {
+		return false;
 	}
 
 	// HACK: Not sure why the chip also send "in" after "ok" on wake
 	if (read_response()) {
 		LOG_LINE("Wake: %s", rx_buffer);
+	} else {
+		return false;
 	}
+	return true;
 }
 
 /**
