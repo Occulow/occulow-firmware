@@ -30,8 +30,8 @@ typedef enum {OK, ACCEPTED, DENIED, UNKNOWN} lora_status_t;
 typedef uint8_t *lora_cmd_t;
 
 void lora_init(void);
-void lora_join_otaa(void);
-void lora_join_abp(void);
+bool lora_join_otaa(void);
+bool lora_join_abp(void);
 void lora_reset(void);
 void lora_sleep(void);
 void lora_wake(void);

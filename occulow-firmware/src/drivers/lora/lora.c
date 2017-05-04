@@ -18,6 +18,7 @@ static void init_power_pins(void);
 static void init_usart(void);
 static void init_reset(void);
 static void setup_channels(void);
+static bool lora_join(lora_cmd_t join_cmd, uint16_t cmd_length);
 static bool read_response(void);
 static void str_to_hex(uint8_t *output, uint8_t *string, uint16_t length);
 
@@ -135,10 +136,10 @@ void setup_channels() {
 /**
  * @brief      Attempts to join the Lora network a maximum of 5 times
  */
-void lora_join_otaa() {
+bool lora_join_otaa() {
 	uint16_t cmd_length;
-	bool accepted = false;
 
+	// Set keys and parameters
 	cmd_length = sprintf((char *) tx_buffer, SET_APPEUI_CMD, "0000000000000100");
 	lora_send_cmd(tx_buffer, cmd_length);
 	cmd_length = sprintf((char *) tx_buffer, SET_DEVEUI_CMD, "1122334455667799");
@@ -154,97 +155,51 @@ void lora_join_otaa() {
 	cmd_length = sprintf((char *) tx_buffer, SAVE_CMD);
 	lora_send_cmd(tx_buffer, cmd_length);
 
-	// Loop MAX_JOIN_ATTEMPTS to try and join the network
-	for(uint16_t i = 0; i < MAX_JOIN_ATTEMPTS; i++){
-		cmd_length = sprintf((char *) tx_buffer, JOIN_OTAA_CMD);
-		lora_send_cmd(tx_buffer,cmd_length);
-
-		if(strncmp(rx_buffer, LORA_OK, sizeof(LORA_OK) - 1) != 0){
-			// Command not received by RN2903. Needs to be sent again.
-			LOG_LINE("Command Failed. Retrying in %d millis", LORA_REJOIN_DELAY);
-			delay_ms(LORA_REJOIN_DELAY);
-			continue;
-		}
-
-		// Loop until response from gateway is received
-		for(uint16_t j = 0; j < MAX_STATUS_CHECKS; j++){
-			if (read_response()) {
-				LOG_LINE("RX: %s", rx_buffer);
-				// Gateway responded
-				if(strncmp(rx_buffer, LORA_ACCEPTED, sizeof(LORA_ACCEPTED) - 1) == 0){
-					accepted = true;
-					LOG_LINE("Join Accepted!");
-					cmd_length = sprintf((char *) tx_buffer, SAVE_CMD);
-					lora_send_cmd(tx_buffer, cmd_length);
-					break;
-				} else if (j == MAX_STATUS_CHECKS - 1) {
-					LOG_LINE("Join Failed... Aborting");
-					accepted = false;
-				} else {
-					// Join request sent and denied, so new command must be sent
-					LOG_LINE("Join Failed... Retrying in %d millis", LORA_REJOIN_DELAY);
-					accepted = false;
-					delay_ms(LORA_REJOIN_DELAY);
-					break;
-				}
-			} else {
-				//Wait 5 seconds before checking for the response again
-				LOG_LINE("No response, waiting 5 seconds...");
-				delay_ms(5000);
-			}
-		}
-		if(accepted){
-			break;
-		}
-	}
+	// Join Network
+	cmd_length = sprintf((char *) tx_buffer, JOIN_OTAA_CMD);
+	return lora_join(tx_buffer, cmd_length);
 }
 
-void lora_join_abp(void) {
-	bool accepted = false;
+bool lora_join_abp(void) {
 	uint16_t cmd_length = 0;
+	cmd_length = sprintf((char *) tx_buffer, JOIN_ABP_CMD);
+	return lora_join(tx_buffer, cmd_length);
+}
+
+static bool lora_join(lora_cmd_t join_cmd, uint16_t cmd_length) {
 	// Loop MAX_JOIN_ATTEMPTS to try and join the network
 	for(uint16_t i = 0; i < MAX_JOIN_ATTEMPTS; i++){
-		cmd_length = sprintf((char *) tx_buffer, JOIN_ABP_CMD);
-		lora_send_cmd(tx_buffer,cmd_length);
+		lora_send_cmd(join_cmd, cmd_length);
 
 		if(strncmp(rx_buffer, LORA_OK, sizeof(LORA_OK) - 1) != 0){
 			// Command not received by RN2903. Needs to be sent again.
 			LOG_LINE("Command Failed. Retrying in %d millis", LORA_REJOIN_DELAY);
 			delay_ms(LORA_REJOIN_DELAY);
-			continue;
-		}
-
-		// Loop until response from gateway is received
-		for(uint16_t j = 0; j < MAX_STATUS_CHECKS; j++){
+		} else {
+			// Read second repsonse
 			if (read_response()) {
 				LOG_LINE("RX: %s", rx_buffer);
 				// Gateway responded
 				if(strncmp(rx_buffer, LORA_ACCEPTED, sizeof(LORA_ACCEPTED) - 1) == 0){
-					accepted = true;
 					LOG_LINE("Join Accepted!");
+					// Save keys
 					cmd_length = sprintf((char *) tx_buffer, SAVE_CMD);
 					lora_send_cmd(tx_buffer, cmd_length);
-					break;
-				} else if (j == MAX_STATUS_CHECKS - 1) {
-					LOG_LINE("Join Failed... Aborting.");
-					accepted = false;
+					return true;
 				} else {
 					// Join request sent and denied, so new command must be sent
 					LOG_LINE("Join Failed... Retrying in %d millis", LORA_REJOIN_DELAY);
-					accepted = false;
 					delay_ms(LORA_REJOIN_DELAY);
-					break;
 				}
 			} else {
-				//Wait 5 seconds before checking for the response again
-				LOG_LINE("No response, waiting 5 seconds...");
-				delay_ms(5000);
+				//Wait before checking for the response again
+				LOG_LINE("No response, waiting %d seconds...", LORA_REJOIN_DELAY);
+				delay_ms(LORA_REJOIN_DELAY);
+				// TODO: Decide if we should exit early here or retry
 			}
 		}
-		if(accepted){
-			break;
-		}
 	}
+	return false;
 }
 
 /**
