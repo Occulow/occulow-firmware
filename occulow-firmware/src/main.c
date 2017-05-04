@@ -25,7 +25,6 @@ static void sleep_device(void);
  */
 void pir_on_wake(void) {
 	// TODO: Implement what happens when the PIR sends an interrupt
-	LOG_LINE("PIR Wake!");
 	inactivity_counter = 0;
 }
 
@@ -50,7 +49,7 @@ static void init_and_join_lora(void) {
 		led_set_state(false);
 		delay_ms(500);
 		led_set_state(true);
-		lora_join_otaa();
+		joined = lora_join_otaa();
 		led_set_state(false);
 	}
 }
