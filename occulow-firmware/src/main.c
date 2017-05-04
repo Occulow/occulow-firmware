@@ -41,6 +41,20 @@ static void sleep_device(void) {
 	system_sleep();
 }
 
+static void init_and_join_lora(void) {
+	bool joined = false;
+	while (!joined) {
+		lora_init();
+		led_set_state(true);
+		delay_ms(500);
+		led_set_state(false);
+		delay_ms(500);
+		led_set_state(true);
+		lora_join_otaa();
+		led_set_state(false);
+	}
+}
+
 int main (void)
 {
 	frame_elem_t grideye_frame[GE_FRAME_SIZE];
@@ -49,18 +63,11 @@ int main (void)
 	init_standby();
 	led_init();
 	stdio_init();
-	lora_init();
 	grideye_init();
 	pc_init();
 	pir_init(pir_on_wake);
+	init_and_join_lora();
 
-	led_set_state(true);
-	delay_ms(500);
-	led_set_state(false);
-	delay_ms(500);
-	led_set_state(true);
-	lora_join_otaa();
-	led_set_state(false);
 	lora_sleep();
 
 	double in_count = 0;
@@ -73,22 +80,29 @@ int main (void)
 			// Each grideye cycle is ~100ms (since it claims 10FPS), so each tick of the
 			//  inactivity counter is assumed to be 100ms.
 			pir_disable_interrupt();
-			inactivity_counter = 0;
+
+			// Send count via Lora
 			led_set_state(true);
-			lora_wake();
-			lora_join_abp();
-			period_in_count = ceil(period_in_count);
-			period_out_count = ceil(period_out_count);
-			lora_send_count(period_in_count, period_out_count);
-			lora_sleep();
+			if (lora_wake()) {
+				if (!lora_join_abp()) {
+					init_and_join_lora();
+				}
+				period_in_count = ceil(period_in_count);
+				period_out_count = ceil(period_out_count);
+				lora_send_count(period_in_count, period_out_count);
+				lora_sleep();
+				period_in_count = 0;
+				period_out_count = 0;
+			}
 			led_set_state(false);
-			period_in_count = 0;
-			period_out_count = 0;
+
+			// Sleep MCU + Grideye
 			ge_set_mode(GE_MODE_SLEEP);
 			pir_enable_interrupt();
 
 			sleep_device();
 
+			// Device is awake here
 			pir_disable_interrupt();
 			ge_set_mode(GE_MODE_NORMAL);
 			pir_enable_interrupt();
