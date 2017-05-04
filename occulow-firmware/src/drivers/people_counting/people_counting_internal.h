@@ -30,5 +30,6 @@ static void initialize_config(pc_config_t *config);
 static void initialize_frame_stacks(void);
 static direction_t determine_direction(uint16_t frame_index, int16_t trigger_col, int16_t offset);
 static void update_counter(void);
+static bool within_threshold(int16_t current, int16_t next);
 
 #endif /* PEOPLE_COUNTING_INTERNAL_H_ */

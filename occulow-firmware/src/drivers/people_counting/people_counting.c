@@ -145,6 +145,12 @@ static void initialize_frame_stacks(void) {
 	}
 }
 
+static bool within_threshold(int16_t current, int16_t next) {
+	int16_t diff = abs(current - next);
+	return (current > next && diff <= LOWER_THRESHOLD) 
+			|| (current <= next && diff <= UPPER_THRESHOLD);
+}
+
 /**
  * @brief      Detect motion on trigger_col and determine the direction of
  *             movement by checking column at trigger_col + offset
@@ -170,7 +176,7 @@ static direction_t determine_direction(uint16_t frame_index,
 	frame_t current_frame = MEDIAN_FRAMES[frame_index];
 	uint16_t current_max_index =
 		get_max_index_in_col(current_frame, trigger_col);
-	uint16_t current_max =
+	int16_t current_max =
 		current_frame[GET_FRAME_INDEX(current_max_index, trigger_col)];
 
 	if (current_max >= TRIGGER_THRESHOLD
@@ -180,8 +186,8 @@ static direction_t determine_direction(uint16_t frame_index,
 		for (uint16_t i = 1; i < 3; i++) {
 			frame_t past_frame = MEDIAN_FRAMES[frame_index - i];
 			uint16_t past_max_index = get_max_index_in_col(past_frame, check_col);
-			uint16_t past_max = past_frame[GET_FRAME_INDEX(past_max_index, check_col)];
-			if (abs(past_max - current_max) <= MAX_THRESHOLD
+			int16_t past_max = past_frame[GET_FRAME_INDEX(past_max_index, check_col)];
+			if (within_threshold(current_max, past_max)
 				&& is_local_max(past_frame, past_max_index, check_col)) {
 				if (offset < 0) {
 					return DIR_IN;
@@ -196,8 +202,8 @@ static direction_t determine_direction(uint16_t frame_index,
 		for (uint16_t i = 1; i < 3; i++) {
 			frame_t future_frame = MEDIAN_FRAMES[frame_index + i];
 			uint16_t future_max_index = get_max_index_in_col(future_frame, check_col);
-			uint16_t future_max = future_frame[GET_FRAME_INDEX(future_max_index, check_col)];
-			if (abs(future_max - current_max) <= MAX_THRESHOLD
+			int16_t future_max = future_frame[GET_FRAME_INDEX(future_max_index, check_col)];
+			if (within_threshold(current_max, future_max)
 				&& is_local_max(future_frame, future_max_index, check_col)) {
 				if (offset < 0) {
 					return DIR_OUT;

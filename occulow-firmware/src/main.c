@@ -107,21 +107,25 @@ int main (void)
 			pir_enable_interrupt();
 		}
 		if (!ge_is_sleeping()) {
+			pir_disable_interrupt();
 			ge_get_frame(grideye_frame);
 			pc_new_frame(grideye_frame);
+			pir_enable_interrupt();
 			in_count = pc_get_in_count();
 			out_count = pc_get_out_count();
+			period_in_count = ceil(period_in_count);
+			period_out_count = ceil(period_out_count);
 
 			if (in_count > 0.0 || out_count > 0.0) {
 				period_in_count += in_count;
 				period_out_count += out_count;
 				if (((double) ((int) period_in_count)) < period_in_count && ((double) ((int) period_out_count)) < period_out_count) {
 					LOG_LINE("D(%d.5,%d.5)", (int) period_in_count, (int) period_out_count);
-					} else if (((double) ((int) period_in_count)) < period_in_count) {
+				} else if (((double) ((int) period_in_count)) < period_in_count) {
 					LOG_LINE("D(%d.5,%d)", (int) period_in_count, (int) period_out_count);
-					} else if (((double) ((int) period_out_count)) < period_out_count) {
+				} else if (((double) ((int) period_out_count)) < period_out_count) {
 					LOG_LINE("D(%d,%d.5)", (int) period_in_count, (int) period_out_count);
-					} else {
+				} else {
 					LOG_LINE("D(%d,%d)", (int) period_in_count, (int) period_out_count);
 				}
 
