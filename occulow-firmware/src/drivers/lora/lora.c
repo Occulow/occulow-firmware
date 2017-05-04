@@ -169,7 +169,10 @@ bool lora_join_abp(void) {
 static bool lora_join(lora_cmd_t join_cmd, uint16_t cmd_length) {
 	// Loop MAX_JOIN_ATTEMPTS to try and join the network
 	for(uint16_t i = 0; i < MAX_JOIN_ATTEMPTS; i++){
-		lora_send_cmd(join_cmd, cmd_length);
+		if (lora_send_cmd(join_cmd, cmd_length) == SEND_FAIL) {
+			LOG_LINE("Unable to send join command: %s", join_cmd);
+			continue;
+		}
 
 		if(strncmp(rx_buffer, LORA_OK, sizeof(LORA_OK) - 1) != 0){
 			// Command not received by RN2903. Needs to be sent again.
@@ -274,7 +277,7 @@ lora_status_t lora_send_cmd(lora_cmd_t cmd, uint16_t len) {
 		return OK;
 	}
 	// TODO: Return something better than OK
-	return OK;
+	return FAIL;
 }
 
 /**
