@@ -13,7 +13,7 @@
 #define GRID_SIZE 8
 #define NUM_MEDIAN_FRAMES 7
 #define MEDIAN_FRAME_CHUNK_SIZE (NUM_MEDIAN_FRAMES * GE_FRAME_SIZE)
-#define NUM_RAW_FRAMES 6
+#define NUM_RAW_FRAMES 10
 #define RAW_FRAME_CHUNK_SIZE (NUM_RAW_FRAMES * GE_FRAME_SIZE)
 
 // Defines for triggers
@@ -26,7 +26,7 @@
 // Thresholds for detecting motion
 #define TRIGGER_THRESHOLD 8  /// Threshold to detect as motion
 #define LOWER_THRESHOLD 4  /// Threshold for heat signature difference in frames
-#define UPPER_THRESHOLD 20  /// Threshold for heat signature difference in frames
+#define UPPER_THRESHOLD 15  /// Threshold for heat signature difference in frames
 
 // Sizes for frames and their elements
 typedef uint16_t *frame_t;
