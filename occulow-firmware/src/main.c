@@ -102,9 +102,12 @@ int main (void)
 			sleep_device();
 
 			// Device is awake here
+			led_set_state(true);
 			pir_disable_interrupt();
 			ge_set_mode(GE_MODE_NORMAL);
 			pir_enable_interrupt();
+			delay_ms(500);
+			led_set_state(false);
 		}
 		if (!ge_is_sleeping()) {
 			pir_disable_interrupt();
