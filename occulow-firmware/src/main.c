@@ -112,12 +112,10 @@ int main (void)
 		if (!ge_is_sleeping()) {
 			pir_disable_interrupt();
 			ge_get_frame(grideye_frame);
-			pc_new_frame(grideye_frame);
 			pir_enable_interrupt();
+			pc_new_frame(grideye_frame);
 			in_count = pc_get_in_count();
 			out_count = pc_get_out_count();
-			period_in_count = ceil(period_in_count);
-			period_out_count = ceil(period_out_count);
 
 			if (in_count > 0.0 || out_count > 0.0) {
 				period_in_count += in_count;

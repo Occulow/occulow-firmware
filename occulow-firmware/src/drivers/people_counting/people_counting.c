@@ -56,14 +56,14 @@ void pc_new_frame(frame_t new_frame) {
 	// Compute and enqueue median frame
 	if (raw_frames_filled) {
 		frame_elem_t median_filtered_frame[GE_FRAME_SIZE];
-		uint16_t median_value = median(new_frame);
+		compute_median_frame(median_filtered_frame, RAW_FRAMES, NUM_RAW_FRAMES);
 
 		// Subtract median from the new frame
 		for (int i = 0; i < GE_FRAME_SIZE; i++) {
-			if (new_frame[i] < median_value) {
+			if (new_frame[i] < median_filtered_frame[i]) {
 				median_filtered_frame[i] = 0;
-			} else {
-				median_filtered_frame[i] = new_frame[i] - median_value;
+				} else {
+				median_filtered_frame[i] = new_frame[i] - median_filtered_frame[i];
 			}
 		}
 

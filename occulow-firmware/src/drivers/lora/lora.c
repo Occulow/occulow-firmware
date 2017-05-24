@@ -143,9 +143,9 @@ bool lora_join_otaa() {
 	// Set keys and parameters
 	cmd_length = sprintf((char *) tx_buffer, SET_APPEUI_CMD, "0000000000000100");
 	lora_send_cmd(tx_buffer, cmd_length);
-	cmd_length = sprintf((char *) tx_buffer, SET_DEVEUI_CMD, "1122334455667799");
+	cmd_length = sprintf((char *) tx_buffer, SET_DEVEUI_CMD, "2233445566778899");
 	lora_send_cmd(tx_buffer, cmd_length);
-	cmd_length = sprintf((char *) tx_buffer, SET_APPKEY_CMD, "2b7e151628aed2a6abf7156669cf4f3c");
+	cmd_length = sprintf((char *) tx_buffer, SET_APPKEY_CMD, "74996249626252393708520194118031");
 	lora_send_cmd(tx_buffer, cmd_length);
 	cmd_length = sprintf((char *) tx_buffer, SET_DEVADDR_CMD, "00000000");
 	lora_send_cmd(tx_buffer, cmd_length);
